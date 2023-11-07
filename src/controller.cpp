@@ -1,4 +1,6 @@
 #include "controller.h"
+
+/*
 #include <iostream>
 #include "SDL.h"
 #include "snake.h"
@@ -39,3 +41,4 @@ void Controller::HandleInput(bool &running, Snake &snake) const {
     }
   }
 }
+*/
