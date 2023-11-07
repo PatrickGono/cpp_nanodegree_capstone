@@ -8,7 +8,7 @@
             "name": "C++ Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/SnakeGame.exe",
+            "program": "${workspaceFolder}/build/n_body_simulation.exe",
             "args": ["arg1", "arg2"],
             "environment": [{ "name": "config", "value": "Debug" }],
             "cwd": "${workspaceFolder}"
