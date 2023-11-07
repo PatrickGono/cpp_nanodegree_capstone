@@ -15,6 +15,7 @@ public:
     particle(vec pos, vec vel, float_type mass) : position_{pos}, velocity_{vel}, mass_{mass} {}
 
     vec& pos() { return position_; }
+    const vec& pos() const { return position_; }
     vec& vel() { return velocity_; }
     float_type mass() const { return mass_; }
 
