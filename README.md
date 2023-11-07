@@ -1,4 +1,5 @@
-# CPPND: Capstone Snake Game Example
+# C++ Nanodegree Capstone
+N-body gravity simulation. Capstone project for the Udacity C++ Nanodegree.
 
 This is a starter repo for the Capstone project in the [Udacity C++ Nanodegree Program](https://www.udacity.com/course/c-plus-plus-nanodegree--nd213). The code for this repo was inspired by [this](https://codereview.stackexchange.com/questions/212296/snake-game-in-c-with-sdl) excellent StackOverflow post and set of responses.
 
