@@ -20,6 +20,7 @@ public:
     void normalize();
     vec2 normalized() const;
     static T distance(const vec2<T>& first, const vec2<T>& second);
+    static T distance_squared(const vec2<T>& first, const vec2<T>& second);
 
     // multiplication
     vec2<T>& operator*=(T value);
@@ -47,7 +48,6 @@ public:
 
     // subtraction
     vec2<T>& operator-=(const vec2<T>& other);
-    vec2<T> operator-(const vec2<T>& vec);
 
     template<class S>
     friend vec2<S> operator-(const vec2<S>& first, const vec2<S>& second);
@@ -117,12 +117,6 @@ vec2<T> operator-(const vec2<T>& first, const vec2<T>& second)
 }
 
 template<class T>
-vec2<T> vec2<T>::operator-(const vec2<T>& vec)
-{
-    return vec2<T>(-vec.x_, -vec.y_);   
-}
-
-template<class T>
 vec2<T>& vec2<T>::operator-=(const vec2<T>& vec)
 {
     x_ -= vec.x_;
@@ -171,4 +165,17 @@ vec2<T> vec2<T>::normalized() const
 {
     T normalization_factor = static_cast<T>(1) / length();
     return vec2<T>(x_, y_) * normalization_factor;
+}
+
+template<class T>
+T vec2<T>::distance_squared(const vec2<T>& first, const vec2<T>& second)
+{
+    auto difference = second - first;
+    return difference * difference;
+}
+
+template<class T>
+T vec2<T>::distance(const vec2<T>& first, const vec2<T>& second)
+{
+    return std::sqrt(distance_squared(first, second));
 }

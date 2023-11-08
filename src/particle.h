@@ -15,17 +15,21 @@ public:
     particle(vec pos, vec vel, float_type mass) : position_{pos}, velocity_{vel}, mass_{mass} {}
 
     vec& pos() { return position_; }
-    const vec& pos() const { return position_; }
     vec& vel() { return velocity_; }
+    vec& acc() { return acceleration_; }
+    const vec& pos() const { return position_; }
+    const vec& vel() const { return velocity_; }
+    const vec& acc() const { return acceleration_; }
     float_type mass() const { return mass_; }
 
     friend std::ostream& operator<<(std::ostream& cout, const particle& part)
     {
-        return cout << "mass = " << part.mass_ << "; pos = " << part.position_ << "; vel = " << part.velocity_ << "\n";
+        return cout << "mass = " << part.mass_ << "; pos = " << part.position_ << "; vel = " << part.velocity_  << "; acc = " << part.acceleration_ << "\n";
     }
 
 private:
     vec position_;
     vec velocity_;
+    vec acceleration_;
     float_type mass_;
 };
