@@ -3,6 +3,7 @@
 constexpr double delta_t = 0.00001;
 constexpr double half_delta_t_squared = 0.5 * delta_t * delta_t;
 constexpr double g_const = 0.1;
+constexpr double epsilon = 0.0001;
 
 simulation::simulation(uint64_t n_particles) : n_particles_{n_particles}, random_engine_{random_device_()}, random_{0, 1}
 {
@@ -35,7 +36,8 @@ void simulation::run(renderer &renderer)
 
         if (frame_end - title_timestamp >= 1000)
         {
-            renderer.update_window_title(n_particles_, frame_count);
+            auto total_energy = compute_total_energy();
+            renderer.update_window_title(n_particles_, total_energy, frame_count);
             title_timestamp = frame_end;
             frame_count = 0;
         }
@@ -69,9 +71,9 @@ void simulation::update()
             auto pos_j = particles_.at(j).pos();
             auto mass_j = particles_.at(j).mass();
             auto denominator = vec::distance_squared(pos_i, pos_j);
-            if (denominator < 0.000001)
+            if (denominator < epsilon)
             {
-                denominator = 100000000.0;
+                denominator = epsilon;
             }
             auto force = g_const * mass_i * mass_j / denominator * (pos_j - pos_i).normalized();
             accelerations.at(i) += force / mass_i;
@@ -93,4 +95,24 @@ void simulation::update()
     }
     std::cout << "===========================================\n";
     */
+}
+
+double simulation::compute_total_energy()
+{
+    auto potential_energy = 0.0;
+    auto kinetic_energy = 0.0;
+
+    for (const auto& particle : particles_)
+    {
+        kinetic_energy += 0.5 * particle.mass() * (particle.vel() * particle.vel());
+        for (const auto& other_particle : particles_)
+        {
+            if (&other_particle == &particle)
+            {
+                continue;
+            }
+            potential_energy += -g_const * particle.mass() * other_particle.mass() / vec::distance(particle.pos(), other_particle.pos());
+        }
+    }
+    return (potential_energy + kinetic_energy) / 1000000;
 }

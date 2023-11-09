@@ -12,7 +12,7 @@ class renderer
   ~renderer();
 
   void render(const std::vector<particle>& particles);
-  void update_window_title(uint64_t n_particles, int fps);
+  void update_window_title(uint64_t n_particles, double total_energy, int fps);
 
  private:
   SDL_Window* sdl_window_;

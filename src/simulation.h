@@ -19,4 +19,5 @@ private:
     std::vector<particle> particles_;
   
     void update();
+    double compute_total_energy();
 };
