@@ -56,7 +56,7 @@ void simulation::update()
         auto pos_i = particles_.at(i).pos();
         auto mass_i = particles_.at(i).mass();
 
-        for (auto j = 0; j < particles_.size(); ++j)
+        for (auto j = i + 1; j < particles_.size(); ++j)
         {
             if (i == j)
             {
