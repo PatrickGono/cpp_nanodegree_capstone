@@ -1,13 +1,7 @@
-#ifndef CONTROLLER_H
-#define CONTROLLER_H
-/*
-class Controller {
- public:
-  void HandleInput(bool &running, Snake &snake) const;
+#pragma once
 
- private:
-  void ChangeDirection(Snake &snake, Snake::Direction input,
-                       Snake::Direction opposite) const;
+class controller 
+{
+public:
+    static void handle_input(bool &running);
 };
-*/
-#endif

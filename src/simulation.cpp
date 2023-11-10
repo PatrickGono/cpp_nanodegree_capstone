@@ -20,12 +20,15 @@ void simulation::run(renderer &renderer)
 
     auto frame_count = 0;
     auto title_timestamp = SDL_GetTicks();
+    auto running = true;
 
-    while(true)
+    while(running)
     {
+        controller::handle_input(running);
+
         auto frame_start = SDL_GetTicks();
 
-        update();
+        update_thread();
         renderer.render(particles_);
 
         auto frame_end = SDL_GetTicks();
@@ -38,8 +41,6 @@ void simulation::run(renderer &renderer)
             title_timestamp = frame_end;
             frame_count = 0;
         }
-
-        SDL_Delay(1);
     }
 }
 
