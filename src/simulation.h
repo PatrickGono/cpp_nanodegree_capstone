@@ -18,5 +18,6 @@ private:
     particle_distribution initial_distribution_;
   
     void update();
+    void update_thread();
     double compute_total_energy();
 };

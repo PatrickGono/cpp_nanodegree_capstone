@@ -1,5 +1,7 @@
 #include "simulation.h"
 
+#include <thread>
+
 constexpr double delta_t = 0.00001;
 constexpr double half_delta_t_squared = 0.5 * delta_t * delta_t;
 constexpr double g_const = 0.1;
@@ -36,6 +38,8 @@ void simulation::run(renderer &renderer)
             title_timestamp = frame_end;
             frame_count = 0;
         }
+
+        SDL_Delay(1);
     }
 }
 
@@ -90,6 +94,70 @@ void simulation::update()
     }
     std::cout << "===========================================\n";
     */
+}
+
+void simulation::update_thread()
+{
+    // 1) update positions
+    for (auto& particle : particles_)
+    {
+        particle.pos() += particle.vel() * delta_t + particle.acc() * half_delta_t_squared;
+    }
+
+    std::vector<vec> accelerations;
+    accelerations.resize(n_particles_, vec());
+
+    auto num_threads = std::thread::hardware_concurrency();
+    std::vector<std::thread> threads;
+    auto work_chunk_size = static_cast<decltype(num_threads)>(std::ceil(n_particles_ / num_threads));
+
+    // 2) calculate forces -> accelerations
+    auto compute_forces = [&accelerations, this](size_t chunk_start, size_t chunk_end) {
+        for (auto i = chunk_start; i < chunk_end; ++i)
+        {
+            auto pos_i = particles_.at(i).pos();
+            auto mass_i = particles_.at(i).mass();
+
+            auto force = vec();
+
+            for (auto j = 0; j < particles_.size(); ++j)
+            {
+                if (i == j)
+                {
+                    continue;
+                }
+
+                auto pos_j = particles_.at(j).pos();
+                auto mass_j = particles_.at(j).mass();
+                auto denominator = vec::distance_squared(pos_i, pos_j);
+                if (denominator < epsilon)
+                {
+                    denominator = epsilon;
+                }
+                force += g_const * mass_i * mass_j / denominator * (pos_j - pos_i).normalized();
+            }
+            accelerations.at(i) += force / mass_i;
+        }
+    };
+
+    for (auto thread_index = 0u; thread_index < num_threads; thread_index++)
+    {
+        auto chunk_start = thread_index * work_chunk_size;
+        auto chunk_end = std::min(static_cast<unsigned int>(n_particles_), (thread_index + 1) * work_chunk_size);
+        threads.emplace_back(compute_forces, chunk_start, chunk_end);   
+    }
+
+    for (auto& thread : threads)
+    {
+        thread.join();
+    }
+
+    // 3) update velocities
+    for (auto i = 0; i < particles_.size(); ++i)
+    {
+        particles_.at(i).vel() += 0.5 * (accelerations.at(i) + particles_.at(i).acc()) * delta_t;
+        particles_.at(i).acc() = accelerations.at(i);
+    }
 }
 
 double simulation::compute_total_energy()
