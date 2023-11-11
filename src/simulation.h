@@ -3,6 +3,7 @@
 #include <random>
 #include "SDL.h"
 #include "renderer.h"
+#include "particle_distribution.h"
 #include "particle.h"
 
 class simulation
@@ -12,11 +13,9 @@ public:
     void run(renderer &renderer);
   
 private:
-    std::random_device random_device_;
-    std::mt19937 random_engine_;
-    std::uniform_real_distribution<double> random_;
     uint64_t n_particles_;
     std::vector<particle> particles_;
+    particle_distribution initial_distribution_;
   
     void update();
     double compute_total_energy();

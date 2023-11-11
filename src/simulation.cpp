@@ -4,22 +4,17 @@ constexpr double delta_t = 0.00001;
 constexpr double half_delta_t_squared = 0.5 * delta_t * delta_t;
 constexpr double g_const = 0.1;
 constexpr double epsilon = 0.0001;
+constexpr double max_speed = 100.0;
 
-simulation::simulation(uint64_t n_particles) : n_particles_{n_particles}, random_engine_{random_device_()}, random_{0, 1}
+simulation::simulation(uint64_t n_particles) : n_particles_{n_particles}, initial_distribution_{}
 {
 }
 
 void simulation::run(renderer &renderer)
 {
-    particles_.emplace_back(vec(0.5, 0.5), vec(0.0, 0.0), 1000);
-    for (uint64_t i = 0; i < n_particles_ - 1; ++i)
-    {
-        auto x = random_(random_engine_);
-        auto y = random_(random_engine_);
-        auto vx = 100.0 * (y - 0.5) * (0.5 + 0.5 * random_(random_engine_));
-        auto vy = -100.0 * (x - 0.5) * (0.5 + 0.5 * random_(random_engine_));
-        particles_.emplace_back(vec(x, y), vec(vx, vy));
-    }
+    particles_ = initial_distribution_.create_distribution(particle_distribution::position_distribution::random_sphere,
+                                                           particle_distribution::velocity_distribution::rotating,
+                                                           n_particles_, max_speed, true, 0.1);
 
     auto frame_count = 0;
     auto title_timestamp = SDL_GetTicks();
