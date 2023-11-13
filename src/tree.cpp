@@ -24,7 +24,7 @@ auto tree_node::is_root() const -> bool
 //
 auto tree_node::is_leaf() const -> bool
 {
-    children_[0] == nullptr && children_[1] == nullptr && children_[2] == nullptr && children_[3] == nullptr;
+    return children_[0] == nullptr && children_[1] == nullptr && children_[2] == nullptr && children_[3] == nullptr;
 }
 
 //

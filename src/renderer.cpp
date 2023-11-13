@@ -3,12 +3,7 @@
 #include <string>
 #include <vector>
 
-renderer::renderer(const std::size_t screen_width, const std::size_t screen_height,
-                   const std::size_t grid_width, const std::size_t grid_height)
-    : screen_width_(screen_width)
-    , screen_height_(screen_height)
-    , grid_width_(grid_width)
-    , grid_height_(grid_height) 
+renderer::renderer(int screen_width, int screen_height) : screen_width_(screen_width), screen_height_(screen_height)
 {
     // Initialize SDL
     if (SDL_Init(SDL_INIT_VIDEO) < 0) 
@@ -55,8 +50,8 @@ void renderer::render(const std::vector<particle>& particles)
     for (const auto& particle : particles)
     {
         SDL_Point point;
-        point.x = screen_width_ * particle.pos().x();
-        point.y = screen_height_ * particle.pos().y();
+        point.x = static_cast<int>(screen_width_ * particle.pos().x());
+        point.y = static_cast<int>(screen_height_ * particle.pos().y());
         points.push_back(point);
     }
   
@@ -66,7 +61,7 @@ void renderer::render(const std::vector<particle>& particles)
   
     // Render particles
     SDL_SetRenderDrawColor(sdl_renderer_, 0xFF, 0xCC, 0x00, 0xFF);
-    SDL_RenderDrawPoints(sdl_renderer_, points.data(), points.size());
+    SDL_RenderDrawPoints(sdl_renderer_, points.data(), static_cast<int>(points.size()));
   
     // Update Screen
     SDL_RenderPresent(sdl_renderer_);

@@ -7,8 +7,7 @@
 class renderer 
 {
  public:
-  renderer(const size_t screen_width, const size_t screen_height,
-           const size_t grid_width, const size_t grid_height);
+  renderer(int screen_width, int screen_height);
   ~renderer();
 
   void render(const std::vector<particle>& particles);
@@ -20,6 +19,4 @@ class renderer
 
   const std::size_t screen_width_;
   const std::size_t screen_height_;
-  const std::size_t grid_width_;
-  const std::size_t grid_height_;
 };
