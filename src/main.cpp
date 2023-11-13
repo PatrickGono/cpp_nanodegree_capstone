@@ -1,10 +1,6 @@
 #define SDL_MAIN_HANDLED
 #include <SDL2/SDL.h>
-#include <iostream>
-#include "controller.h"
 #include "renderer.h"
-#include "vec2.h"
-#include "particle.h"
 #include "simulation.h"
 
 int main(int argc, char* argv[]) 
