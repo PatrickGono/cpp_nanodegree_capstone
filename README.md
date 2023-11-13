@@ -1,7 +1,11 @@
 # N-body gravity simulation
 Capstone project for the Udacity C++ Nanodegree. Simulates the gravitational attraction between simple particles in a 2D plane, and renders their motion in real time.
 
-This Capstone project ([Udacity C++ Nanodegree Program](https://www.udacity.com/course/c-plus-plus-nanodegree--nd213)) is built on top of the SDL starter project provided by the course. 
+This Capstone project ([Udacity C++ Nanodegree Program](https://www.udacity.com/course/c-plus-plus-nanodegree--nd213)) is built on top of the SDL starter project provided by the course:
+[CppND-Capstone-Snake-Game by Udacity](https://github.com/udacity/CppND-Capstone-Snake-Game)
+
+The implementation of the quadtree algorithm is inspired by this work:
+[Barnes-Hut-Simulator by Belt of Orion](https://github.com/beltoforion/Barnes-Hut-Simulator)
 
 ## Dependencies for Running Locally
 * cmake >= 3.7
