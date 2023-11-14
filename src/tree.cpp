@@ -75,6 +75,32 @@ auto tree_node::calculate_force(const particle& part) -> vec
 
 ///
 ///
+auto tree_node::calculate_center_of_mass() -> void
+{
+    // if this is a leaf node with a single particle, its mass and position are taken
+    if (n_particles_ == 1)
+    {
+        center_of_mass_ = particle_->pos();
+        mass_ = particle_->mass();
+        return;
+    }
+
+    for (const auto& child : children_)
+    {
+        if (child == nullptr)
+        {
+            continue;
+        }
+
+        child->calculate_center_of_mass();
+        mass_ += child->mass_;
+        center_of_mass_ += child->mass_ * child->center_of_mass_;
+    }
+    center_of_mass_ /= mass_;
+}
+
+///
+///
 auto tree_node::create_node_for_quadrant(quadrant quad) const -> std::unique_ptr<tree_node>
 {
     square_area new_area;

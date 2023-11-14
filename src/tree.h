@@ -21,11 +21,11 @@ class tree_node
 {
 public:
     tree_node(square_area area, tree_node* parent);
-    // auto calculate_force() const -> vec;
 
     auto insert_particle(particle* part) -> void;
     auto print_node() const -> void;
     auto calculate_force(const particle& part) -> vec;
+    auto calculate_center_of_mass() -> void;
 
 private:
     auto get_quadrant(const vec& pos) -> quadrant;
