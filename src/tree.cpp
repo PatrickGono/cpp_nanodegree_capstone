@@ -1,13 +1,14 @@
 #include "tree.h"
 #include <iostream>
 
-constexpr float_type theta = 0.1;
+// TODO: move to a more reasonable place
+constexpr float_type theta = 0.5;
 constexpr float_type epsilon = 10000;
 constexpr float_type g_const = 0.1;
 
 ///
 ///
-tree_node::tree_node(square_area area, tree_node* parent) : area_{area}, parent_{parent}, n_particles_{0}, level_{0}
+tree_node::tree_node(square_area area, tree_node* parent) : area_{area}, parent_{parent}, n_particles_{0}, level_{0}, mass_{0}, center_of_mass_{vec()}
 {
     children_[0] = nullptr;
     children_[1] = nullptr;
@@ -34,7 +35,8 @@ auto tree_node::print_node() const -> void
     {
         std::cout << particle_->pos() << ", ";
     } 
-    std::cout << "quadrant: " << area_.top_left_corner << ", side length: " << area_.side << "\n";
+    std::cout << "top left corner: " << area_.top_left_corner << ", side length: " << area_.side << "\n";
+    std::cout << indent << "center_of_mass: " << center_of_mass_ << ", mass: " << mass_ << "\n";
 
     for (const auto& child : children_)
     {
@@ -48,28 +50,34 @@ auto tree_node::print_node() const -> void
 
 ///
 ///
-auto tree_node::calculate_force(const particle& part) -> vec
+auto tree_node::calculate_acceleration(const particle& part) -> vec
 {
+    if (particle_ == &part)
+    {
+        return vec(0.0, 0.0);
+    }
+
     auto inverse_dist = 1.0 / vec::distance(center_of_mass_, part.pos());
-    if (area_.side * inverse_dist < theta)
+    if ((area_.side * inverse_dist) < theta)
     {
         auto denominator = inverse_dist * inverse_dist;
         if (denominator > epsilon)
         {
             denominator = epsilon;
         }
-        return g_const * mass_ * part.mass() * denominator * (center_of_mass_ - part);
+        return g_const * mass_ * denominator * (center_of_mass_ - part.pos()).normalized();
     }
     
-    auto force = vec();
+    auto force = vec(0.0, 0.0);
     for (const auto& child : children_)
     {
         if (child == nullptr)
         {
             continue;
         }
-        force += child->calculate_force(part);
+        force += child->calculate_acceleration(part);
     }
+
     return force;
 }
 
@@ -77,7 +85,7 @@ auto tree_node::calculate_force(const particle& part) -> vec
 ///
 auto tree_node::calculate_center_of_mass() -> void
 {
-    // if this is a leaf node with a single particle, its mass and position are taken
+    // if this is a leaf node with a single particle, its mass and position are used
     if (n_particles_ == 1)
     {
         center_of_mass_ = particle_->pos();
@@ -147,17 +155,13 @@ auto tree_node::create_node_for_quadrant(quadrant quad) const -> std::unique_ptr
 ///
 auto tree_node::insert_particle(particle* part) -> void
 {
-    if (level_ > 10)
-    {
-        std::cout << "ERROR reached max level\n";
-        return;
-    }
     if (part->pos().x() < area_.top_left_corner.x() 
         || part->pos().x() > area_.top_left_corner.x() + area_.side
         || part->pos().y() < area_.top_left_corner.y()
         || part->pos().y() > area_.top_left_corner.y() + area_.side)
     {
-        std::cout << "ERROR particle outside of quadrant\n";
+        //std::cout << "ERROR particle outside of quadrant\n" << *part;
+        return;
     }
 
     if (n_particles_ == 0)

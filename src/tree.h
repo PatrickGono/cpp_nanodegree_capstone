@@ -24,7 +24,7 @@ public:
 
     auto insert_particle(particle* part) -> void;
     auto print_node() const -> void;
-    auto calculate_force(const particle& part) -> vec;
+    auto calculate_acceleration(const particle& part) -> vec;
     auto calculate_center_of_mass() -> void;
 
 private:
