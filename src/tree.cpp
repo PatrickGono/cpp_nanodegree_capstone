@@ -2,9 +2,11 @@
 #include <iostream>
 
 constexpr float_type theta = 0.1;
+constexpr float_type epsilon = 10000;
+constexpr float_type g_const = 0.1;
 
-//
-//
+///
+///
 tree_node::tree_node(square_area area, tree_node* parent) : area_{area}, parent_{parent}, n_particles_{0}, level_{0}
 {
     children_[0] = nullptr;
@@ -13,22 +15,8 @@ tree_node::tree_node(square_area area, tree_node* parent) : area_{area}, parent_
     children_[3] = nullptr;
 }
 
-//
-//
-auto tree_node::is_root() const -> bool
-{
-    return parent_ == nullptr;
-}
-
-//
-//
-auto tree_node::is_leaf() const -> bool
-{
-    return children_[0] == nullptr && children_[1] == nullptr && children_[2] == nullptr && children_[3] == nullptr;
-}
-
-//
-//
+///
+///
 auto tree_node::print_node() const -> void
 {
     auto indent = std::string("");
@@ -36,7 +24,6 @@ auto tree_node::print_node() const -> void
     {
         indent += "  ";
     }
-
 
     std::cout << indent << "n_particles: " << n_particles_ << ", particle: ";
     if (particle_ == nullptr)
@@ -59,8 +46,35 @@ auto tree_node::print_node() const -> void
     }
 }
 
-//
-//
+///
+///
+auto tree_node::calculate_force(const particle& part) -> vec
+{
+    auto inverse_dist = 1.0 / vec::distance(center_of_mass_, part.pos());
+    if (area_.side * inverse_dist < theta)
+    {
+        auto denominator = inverse_dist * inverse_dist;
+        if (denominator > epsilon)
+        {
+            denominator = epsilon;
+        }
+        return g_const * mass_ * part.mass() * denominator * (center_of_mass_ - part);
+    }
+    
+    auto force = vec();
+    for (const auto& child : children_)
+    {
+        if (child == nullptr)
+        {
+            continue;
+        }
+        force += child->calculate_force(part);
+    }
+    return force;
+}
+
+///
+///
 auto tree_node::create_node_for_quadrant(quadrant quad) const -> std::unique_ptr<tree_node>
 {
     square_area new_area;
@@ -103,8 +117,8 @@ auto tree_node::create_node_for_quadrant(quadrant quad) const -> std::unique_ptr
     return std::move(new_node);
 }
 
-//
-//
+///
+///
 auto tree_node::insert_particle(particle* part) -> void
 {
     if (level_ > 10)
@@ -177,4 +191,18 @@ auto tree_node::get_quadrant(const vec& pos) -> quadrant
         return quadrant::top_right;
     }
     return quadrant::bottom_right;
+}
+
+///
+///
+auto tree_node::is_root() const -> bool
+{
+    return parent_ == nullptr;
+}
+
+///
+///
+auto tree_node::is_leaf() const -> bool
+{
+    return children_[0] == nullptr && children_[1] == nullptr && children_[2] == nullptr && children_[3] == nullptr;
 }

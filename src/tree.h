@@ -24,15 +24,14 @@ public:
     // auto calculate_force() const -> vec;
 
     auto insert_particle(particle* part) -> void;
-    auto is_root() const -> bool;
-    auto is_leaf() const -> bool;
-
     auto print_node() const -> void;
-
+    auto calculate_force(const particle& part) -> vec;
 
 private:
     auto get_quadrant(const vec& pos) -> quadrant;
     auto create_node_for_quadrant(quadrant quad) const -> std::unique_ptr<tree_node>;
+    auto is_root() const -> bool;
+    auto is_leaf() const -> bool;
 
     std::unique_ptr<tree_node> children_[4];
     tree_node* parent_;
