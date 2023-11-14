@@ -19,5 +19,6 @@ private:
   
     void update();
     void update_thread();
+    void update_barnes_hut();
     double compute_total_energy();
 };

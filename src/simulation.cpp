@@ -1,5 +1,7 @@
 #include "simulation.h"
+
 #include "controller.h"
+#include "tree.h"
 
 #include <thread>
 
@@ -7,12 +9,16 @@ constexpr double delta_t = 0.00001;
 constexpr double half_delta_t_squared = 0.5 * delta_t * delta_t;
 constexpr double g_const = 0.1;
 constexpr double epsilon = 0.0001;
-constexpr double max_speed = 100.0;
+constexpr double max_speed = 50.0;
 
+///
+///
 simulation::simulation(uint64_t n_particles) : n_particles_{n_particles}, initial_distribution_{}
 {
 }
 
+///
+///
 void simulation::run(renderer &renderer)
 {
     particles_ = initial_distribution_.create_distribution(particle_distribution::position_distribution::random_sphere,
@@ -29,7 +35,7 @@ void simulation::run(renderer &renderer)
 
         auto frame_start = SDL_GetTicks();
 
-        update_thread();
+        update_barnes_hut();
         renderer.render(particles_);
 
         auto frame_end = SDL_GetTicks();
@@ -37,7 +43,7 @@ void simulation::run(renderer &renderer)
 
         if (frame_end - title_timestamp >= 1000)
         {
-            auto total_energy = compute_total_energy();
+            auto total_energy = 0.0; //compute_total_energy();
             renderer.update_window_title(n_particles_, total_energy, frame_count);
             title_timestamp = frame_end;
             frame_count = 0;
@@ -45,6 +51,8 @@ void simulation::run(renderer &renderer)
     }
 }
 
+///
+///
 void simulation::update()
 {
     // 1) update positions
@@ -98,6 +106,8 @@ void simulation::update()
     */
 }
 
+///
+///
 void simulation::update_thread()
 {
     // 1) update positions
@@ -162,6 +172,48 @@ void simulation::update_thread()
     }
 }
 
+///
+///
+void simulation::update_barnes_hut()
+{
+    // 1) update positions
+    for (auto& particle : particles_)
+    {
+        particle.pos() += particle.vel() * delta_t + particle.acc() * half_delta_t_squared;
+    }
+
+    std::vector<vec> accelerations;
+    accelerations.resize(n_particles_, vec());
+
+    // build tree
+    square_area area;
+    area.side = 3.0;
+    area.top_left_corner = vec(-1, -1);
+    auto quad_tree = tree_node(area, nullptr);
+    for (auto& particle : particles_)
+    {
+        quad_tree.insert_particle(&particle);
+    }
+
+    // compute mass statistics
+    quad_tree.calculate_center_of_mass();
+
+    // 2) calculate forces -> accelerations
+    for (auto i = 0; i < particles_.size(); ++i)
+    {
+        accelerations.at(i) = quad_tree.calculate_acceleration(particles_.at(i));
+    }
+
+    // 3) update velocities
+    for (auto i = 0; i < particles_.size(); ++i)
+    {
+        particles_.at(i).vel() += 0.5 * (accelerations.at(i) + particles_.at(i).acc()) * delta_t;
+        particles_.at(i).acc() = accelerations.at(i);
+    }
+}
+
+///
+///
 double simulation::compute_total_energy()
 {
     auto potential_energy = 0.0;
