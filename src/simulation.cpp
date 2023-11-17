@@ -19,7 +19,7 @@ simulation::simulation(uint64_t n_particles) : n_particles_{n_particles}, initia
 
 ///
 ///
-void simulation::run(renderer &renderer)
+auto simulation::run(renderer &renderer) -> void
 {
     particles_ = initial_distribution_.create_distribution(particle_distribution::position_distribution::random_sphere,
                                                            particle_distribution::velocity_distribution::rotating,
@@ -29,7 +29,7 @@ void simulation::run(renderer &renderer)
     auto title_timestamp = SDL_GetTicks();
     auto running = true;
 
-    while(running)
+    while (running)
     {
         controller::handle_input(running);
 
@@ -53,7 +53,7 @@ void simulation::run(renderer &renderer)
 
 ///
 ///
-void simulation::update()
+auto simulation::update() -> void 
 {
     // 1) update positions
     for (auto& particle : particles_)
@@ -96,19 +96,11 @@ void simulation::update()
         particles_.at(i).vel() += 0.5 * (accelerations.at(i) + particles_.at(i).acc()) * delta_t;
         particles_.at(i).acc() = accelerations.at(i);
     }
-
-    /*
-    for (const auto& particle : particles_)
-    {
-        std::cout << particle;
-    }
-    std::cout << "===========================================\n";
-    */
 }
 
 ///
 ///
-void simulation::update_thread()
+auto simulation::update_thread() -> void 
 {
     // 1) update positions
     for (auto& particle : particles_)
@@ -174,7 +166,7 @@ void simulation::update_thread()
 
 ///
 ///
-void simulation::update_barnes_hut()
+auto simulation::update_barnes_hut() -> void
 {
     // 1) update positions
     for (auto& particle : particles_)
@@ -214,7 +206,7 @@ void simulation::update_barnes_hut()
 
 ///
 ///
-double simulation::compute_total_energy()
+auto simulation::compute_total_energy() -> double
 {
     auto potential_energy = 0.0;
     auto kinetic_energy = 0.0;

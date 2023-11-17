@@ -2,6 +2,6 @@
 
 class controller 
 {
-public:
-    static void handle_input(bool &running);
+public: // Interface
+    static auto handle_input(bool &running) -> void;
 };

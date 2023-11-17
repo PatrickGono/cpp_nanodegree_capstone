@@ -1,9 +1,8 @@
 #include "controller.h"
 
-#include <iostream>
 #include "SDL.h"
 
-void controller::handle_input(bool &running)
+auto controller::handle_input(bool &running) -> void
 {
     SDL_Event e;
     while (SDL_PollEvent(&e)) 

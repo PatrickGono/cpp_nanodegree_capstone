@@ -1,24 +1,25 @@
 #pragma once
 
-#include <random>
-#include "SDL.h"
-#include "renderer.h"
-#include "particle_distribution.h"
 #include "particle.h"
+#include "particle_distribution.h"
+#include "renderer.h"
 
 class simulation
 {
-public:
+public: // Structors
     simulation(uint64_t n_particles); 
-    void run(renderer &renderer);
+
+public: // Interface
+    auto run(renderer &renderer) -> void;
   
-private:
+private: // Implementation
+    auto update() -> void;
+    auto update_thread() -> void;
+    auto update_barnes_hut() -> void;
+    auto compute_total_energy() -> double;
+
+private: // Variables
     uint64_t n_particles_;
     std::vector<particle> particles_;
     particle_distribution initial_distribution_;
-  
-    void update();
-    void update_thread();
-    void update_barnes_hut();
-    double compute_total_energy();
 };

@@ -1,15 +1,9 @@
 #include "renderer.h"
+
 #include <iostream>
 #include <string>
 #include <vector>
 #include <algorithm>
-
-struct color
-{
-    constexpr color(int r, int g, int b, int a) : r(r), g(g), b(b), a(a) {}
-    color() : r(0), g(0), b(0), a(0) {}
-    int r, g, b, a;
-};
 
 constexpr size_t max_color_speed_bands = 4;
 constexpr color colors[max_color_speed_bands] = {{255, 255, 255, 255}, {255, 200, 150, 255}, {200, 150, 100, 255}, {150, 100, 50, 255}};
@@ -49,20 +43,22 @@ renderer::~renderer()
     SDL_Quit();
 }
 
-void renderer::update_window_title(uint64_t n_particles, double total_energy, int fps) 
+auto renderer::update_window_title(uint64_t n_particles, double total_energy, int fps) -> void
 {
     std::string title{"Particles: " + std::to_string(n_particles) + " Energy: " + std::to_string(total_energy) + " FPS: " + std::to_string(fps)};
     SDL_SetWindowTitle(sdl_window_, title.c_str());
 }
 
-void renderer::render(const std::vector<particle>& particles)
+auto renderer::render(const std::vector<particle>& particles) -> void
 {
+    // Sort particles by their speed
     std::vector<particle> reordered_particles = particles;
     std::sort(reordered_particles.begin(), reordered_particles.end(), [](const auto& first, const auto& second) 
     {
         return first.vel().length() > second.vel().length();
     });
 
+    // Create SDL points from sorted particle list
     std::vector<SDL_Point> points;
     for (const auto& particle : reordered_particles)
     {
