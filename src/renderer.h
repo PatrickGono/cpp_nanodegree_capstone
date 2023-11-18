@@ -1,4 +1,5 @@
 #pragma once
+#include "camera.h"
 #include "particle.h"
 
 #include "SDL.h"
@@ -19,7 +20,7 @@ public: // Structors
     ~renderer();
 
 public: // Interface
-    auto render(const std::vector<particle>& particles) -> void;
+    auto render(const std::vector<particle>& particles, const camera& cam) -> void;
     auto update_window_title(uint64_t n_particles, double total_energy, int fps) -> void;
 
 private: // Variables

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "camera.h"
 #include "particle.h"
 #include "particle_distribution.h"
 #include "renderer.h"
@@ -22,4 +23,5 @@ private: // Variables
     uint64_t n_particles_;
     std::vector<particle> particles_;
     particle_distribution initial_distribution_;
+    camera camera_;
 };

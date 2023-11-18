@@ -13,7 +13,7 @@ constexpr double max_speed = 50.0;
 
 ///
 ///
-simulation::simulation(uint64_t n_particles) : n_particles_{n_particles}, initial_distribution_{}
+simulation::simulation(uint64_t n_particles) : n_particles_{n_particles}, initial_distribution_{}, camera_{}
 {
 }
 
@@ -31,12 +31,12 @@ auto simulation::run(renderer &renderer) -> void
 
     while (running)
     {
-        controller::handle_input(running);
+        controller::handle_input(running, camera_);
 
         auto frame_start = SDL_GetTicks();
 
         update_barnes_hut();
-        renderer.render(particles_);
+        renderer.render(particles_, camera_);
 
         auto frame_end = SDL_GetTicks();
         ++frame_count;

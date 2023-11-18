@@ -24,14 +24,14 @@ auto camera::transform(const vec& position) const -> vec
 ///
 auto camera::translate_x(bool left) -> void
 {
-    position_.x() += 1.0 / zoom_level_ * (left ? -camera_zoom_speed : camera_zoom_speed);
+    position_.x() += zoom_level_ * (left ? -camera_zoom_speed : camera_zoom_speed);
 }
 
 ///
 ///
 auto camera::translate_y(bool left) -> void
 {
-    position_.y() += 1.0 / zoom_level_ * (left ? -camera_zoom_speed : camera_zoom_speed);
+    position_.y() += zoom_level_ * (left ? -camera_zoom_speed : camera_zoom_speed);
 }
 
 ///

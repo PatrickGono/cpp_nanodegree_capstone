@@ -8,6 +8,8 @@
 constexpr size_t max_color_speed_bands = 4;
 constexpr color colors[max_color_speed_bands] = {{255, 255, 255, 255}, {255, 200, 150, 255}, {200, 150, 100, 255}, {150, 100, 50, 255}};
 
+///
+///
 renderer::renderer(int screen_width, int screen_height) : screen_width_(screen_width), screen_height_(screen_height)
 {
     // Initialize SDL
@@ -37,19 +39,25 @@ renderer::renderer(int screen_width, int screen_height) : screen_width_(screen_w
     }
 }
 
+///
+///
 renderer::~renderer() 
 {
     SDL_DestroyWindow(sdl_window_);
     SDL_Quit();
 }
 
+///
+///
 auto renderer::update_window_title(uint64_t n_particles, double total_energy, int fps) -> void
 {
     std::string title{"Particles: " + std::to_string(n_particles) + " Energy: " + std::to_string(total_energy) + " FPS: " + std::to_string(fps)};
     SDL_SetWindowTitle(sdl_window_, title.c_str());
 }
 
-auto renderer::render(const std::vector<particle>& particles) -> void
+///
+///
+auto renderer::render(const std::vector<particle>& particles, const camera& cam) -> void
 {
     // Sort particles by their speed
     std::vector<particle> reordered_particles = particles;
@@ -63,8 +71,9 @@ auto renderer::render(const std::vector<particle>& particles) -> void
     for (const auto& particle : reordered_particles)
     {
         SDL_Point point;
-        point.x = static_cast<int>(screen_width_ * particle.pos().x());
-        point.y = static_cast<int>(screen_height_ * particle.pos().y());
+        const auto window_position = cam.transform(particle.pos());
+        point.x = static_cast<int>(screen_width_ * window_position.x());
+        point.y = static_cast<int>(screen_height_ * window_position.y());
         points.push_back(point);
     }
 
