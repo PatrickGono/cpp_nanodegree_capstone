@@ -18,15 +18,19 @@ auto controller::handle_input(bool& running, camera& cam) -> void
             switch (event.key.keysym.sym) 
             {
             case SDLK_UP:
+            case SDLK_w:
                 cam.translate_y(true);
                 break;
             case SDLK_DOWN:
+            case SDLK_s:
                 cam.translate_y(false);
                 break;
             case SDLK_LEFT:
+            case SDLK_a:
                 cam.translate_x(true);
                 break;
             case SDLK_RIGHT:
+            case SDLK_d:
                 cam.translate_x(false);
                 break;
             }
