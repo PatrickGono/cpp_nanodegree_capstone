@@ -1,13 +1,19 @@
 #include "particle_distribution.h"
+
 #include "vec2.h"
+
 #include <random>
 
 constexpr double central_body_mass = 1000.0;
 
+///
+///
 particle_distribution::particle_distribution() : random_engine_{random_device_()}, random_{0, 1}
 {
 }
 
+///
+///
 vec particle_distribution::generate_random_vec()
 {
     auto x = random_(random_engine_);
@@ -29,7 +35,7 @@ std::vector<particle> particle_distribution::create_distribution(position_distri
     size_t particle_index = 0;
     if (add_central_body)
     {
-        particles.emplace_back(vec(0.5, 0.5), vec(0.0, 0.0), central_body_mass);
+        particles.emplace_back(vec(0.0, 0.0), vec(0.0, 0.0), central_body_mass);
         ++particle_index;
     }
 
@@ -45,7 +51,7 @@ std::vector<particle> particle_distribution::create_distribution(position_distri
             }
             case position_distribution::random_square:
             {
-                particles.emplace_back(generate_random_vec(), vec(), 1.0);
+                particles.emplace_back(generate_random_vec() - vec(0.5), vec(), 1.0);
                 break;
             }
             case position_distribution::random_sphere:
@@ -53,8 +59,8 @@ std::vector<particle> particle_distribution::create_distribution(position_distri
             {
                 while (true)
                 {
-                    auto random_vec = generate_random_vec();
-                    if (vec::distance(random_vec, vec(0.5, 0.5)) < 0.5)
+                    auto random_vec = generate_random_vec() - vec(0.5);
+                    if (vec::distance(random_vec, vec(0.0)) < 0.5)
                     {
                         particles.emplace_back(random_vec, vec(), 1.0);
                         break;
@@ -89,8 +95,8 @@ std::vector<particle> particle_distribution::create_distribution(position_distri
                 auto random_factor = random_(random_engine_);
                 auto minimum_speed = (1 - randomization_ratio) * max_speed;
                 auto random_speed = random_factor * (max_speed - minimum_speed);
-                auto vx = minimum_speed * (particle.pos().y() - 0.5) * 2.0;
-                auto vy = -minimum_speed * (particle.pos().x() - 0.5) * 2.0;
+                auto vx = minimum_speed * particle.pos().y() * 2.0;
+                auto vy = -minimum_speed * particle.pos().x() * 2.0;
                 particle.vel() = vec(vx, vy) + random_speed * random_direction;
                 break;
             }
