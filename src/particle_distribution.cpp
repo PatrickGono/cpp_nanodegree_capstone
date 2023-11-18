@@ -14,19 +14,22 @@ particle_distribution::particle_distribution() : random_engine_{random_device_()
 
 ///
 ///
-vec particle_distribution::generate_random_vec()
+auto particle_distribution::generate_random_vec() -> vec
 {
     auto x = random_(random_engine_);
     auto y = random_(random_engine_);
     return vec(x, y);
 }
 
-std::vector<particle> particle_distribution::create_distribution(position_distribution pos_dist, 
-                                                                 velocity_distribution vel_dist, 
-                                                                 uint64_t n_particles,
-                                                                 double max_speed, 
-                                                                 bool add_central_body /* = true */,
-                                                                 double randomization_ratio /* = 0.0 */)
+///
+///
+auto particle_distribution::create_distribution(
+    position_distribution pos_dist, 
+    velocity_distribution vel_dist, 
+    uint64_t n_particles,
+    double max_speed, 
+    bool add_central_body /* = true */,
+    double randomization_ratio /* = 0.0 */) -> std::vector<particle>
 {
     std::vector<particle> particles;
     particles.reserve(n_particles);
