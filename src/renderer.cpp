@@ -73,7 +73,7 @@ auto renderer::render(const std::vector<particle>& particles, const camera& cam)
         SDL_Point point;
         const auto window_position = cam.transform(particle.pos());
         point.x = static_cast<int>(screen_width_ * window_position.x());
-        point.y = static_cast<int>(screen_height_ * window_position.y());
+        point.y = static_cast<int>(screen_width_ * window_position.y());
         points.push_back(point);
     }
 
