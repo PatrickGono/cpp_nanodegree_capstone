@@ -5,8 +5,8 @@
 #include <vector>
 #include <algorithm>
 
-constexpr size_t max_color_speed_bands = 4;
-constexpr color colors[max_color_speed_bands] = {{255, 255, 255, 255}, {255, 200, 150, 255}, {200, 150, 100, 255}, {150, 100, 50, 255}};
+constexpr size_t max_colors = 4;
+constexpr color colors[max_colors] = {{255, 255, 255, 255}, {255, 200, 150, 255}, {200, 150, 100, 255}, {150, 100, 50, 255}};
 
 ///
 ///
@@ -59,11 +59,11 @@ auto renderer::update_window_title(uint64_t n_particles, double total_energy, in
 ///
 auto renderer::render(const std::vector<particle>& particles, const camera& cam) -> void
 {
-    // Sort particles by their speed
+    // Sort particles by their acceleration 
     std::vector<particle> reordered_particles = particles;
     std::sort(reordered_particles.begin(), reordered_particles.end(), [](const auto& first, const auto& second) 
     {
-        return first.vel().length() > second.vel().length();
+        return first.acc().length() > second.acc().length();
     });
 
     // Create SDL points from sorted particle list
@@ -82,8 +82,8 @@ auto renderer::render(const std::vector<particle>& particles, const camera& cam)
     SDL_RenderClear(sdl_renderer_);
   
     // Render particles
-    auto band_size = static_cast<int>(std::ceil(static_cast<float_type>(points.size()) / max_color_speed_bands));
-    for (auto i = 0; i < max_color_speed_bands; i++)
+    auto band_size = static_cast<int>(std::ceil(static_cast<float_type>(points.size()) / max_colors));
+    for (auto i = 0; i < max_colors; i++)
     {
         auto band_start = i * band_size;
         auto band_end = std::min((i + 1) * band_size, static_cast<int>(points.size()));
