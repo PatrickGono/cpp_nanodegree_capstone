@@ -4,6 +4,7 @@
 #include "particle.h"
 #include "particle_distribution.h"
 #include "renderer.h"
+#include "tree.h"
 
 class simulation
 {
@@ -37,6 +38,8 @@ private: // Implementation
 
     auto compute_total_energy() -> float_type;
 
+    auto calculate_particles_bounds() const -> square_area;
+
 private: // Variables
     uint64_t n_particles_;
     std::vector<particle> particles_;
@@ -44,4 +47,6 @@ private: // Variables
     algorithm algorithm_;
     camera camera_;
     bool running_;
+    int frame_count_;
+    square_area area_;
 };

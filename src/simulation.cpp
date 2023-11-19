@@ -17,8 +17,10 @@ simulation::simulation(uint64_t n_particles)
    : n_particles_{n_particles}
    , initial_distribution_{}
    , camera_{}
-   , algorithm_{algorithm::barnes_hut}
+   , algorithm_{algorithm::brute_force}
    , running_{false}
+   , frame_count_{0}
+   , area_{vec(-1.0, -1.0), 2.0}
 {
 }
 
@@ -53,7 +55,7 @@ auto simulation::run(renderer &renderer) -> void
         particle_distribution::velocity_distribution::rotating,
         n_particles_, max_speed, true);
 
-    auto frame_count = 0;
+    frame_count_ = 0;
     auto title_timestamp = SDL_GetTicks();
     running_ = true;
 
@@ -67,14 +69,14 @@ auto simulation::run(renderer &renderer) -> void
         renderer.render(particles_, camera_);
 
         auto frame_end = SDL_GetTicks();
-        ++frame_count;
+        ++frame_count_;
 
         if (frame_end - title_timestamp >= 1000)
         {
             float_type total_energy = 0.0; //compute_total_energy();
-            renderer.update_window_title(n_particles_, total_energy, frame_count);
+            renderer.update_window_title(n_particles_, total_energy, frame_count_);
             title_timestamp = frame_end;
-            frame_count = 0;
+            frame_count_ = 0;
         }
     }
 }
@@ -198,11 +200,14 @@ auto simulation::calculate_brute_force_parallel(std::vector<vec>& accelerations)
 ///
 auto simulation::calculate_barnes_hut(std::vector<vec>& accelerations) -> void
 {
+    // Adjust area every n frames
+    if (frame_count_ % 10 == 0)
+    {
+        area_ = calculate_particles_bounds();
+    }
+
     // Build quad tree
-    square_area area;
-    area.side = 3.0;
-    area.top_left_corner = vec(-1, -1);
-    auto quad_tree = tree_node(area, nullptr);
+    auto quad_tree = tree_node(area_, nullptr);
     for (auto& particle : particles_)
     {
         quad_tree.insert_particle(&particle);
@@ -238,4 +243,25 @@ auto simulation::compute_total_energy() -> float_type
         }
     }
     return (potential_energy + kinetic_energy) / 1000000;
+}
+
+///
+///
+auto simulation::calculate_particles_bounds() const -> square_area
+{
+    float_type min_x = std::numeric_limits<float_type>::max();
+    float_type min_y = std::numeric_limits<float_type>::max(); 
+    float_type max_x = std::numeric_limits<float_type>::min();
+    float_type max_y = std::numeric_limits<float_type>::min(); 
+
+    for (const auto& particle : particles_)
+    {
+        const auto& pos = particle.pos();
+        min_x = std::min(min_x, pos.x());
+        max_x = std::max(max_x, pos.x());
+        min_y = std::min(min_y, pos.y());
+        max_y = std::max(max_y, pos.y());
+    }
+
+    return square_area(vec(min_x, min_y), std::max((max_x - min_x), (max_y - min_y)));
 }

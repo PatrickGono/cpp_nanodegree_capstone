@@ -6,6 +6,9 @@
 
 struct square_area
 {
+    square_area() : top_left_corner{vec()}, side(0.0) {}
+    square_area(vec pos, float_type length) : top_left_corner{pos}, side(length) {}
+
     vec top_left_corner;
     float_type side;
 };
