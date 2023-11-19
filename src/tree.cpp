@@ -104,13 +104,15 @@ auto tree_node::print_node() const -> void
 ///
 auto tree_node::calculate_acceleration(const particle& part) -> vec
 {
+    // If it's the same particle as the one in the current node, no force
     if (particle_ == &part)
     {
         return vec(0.0, 0.0);
     }
 
+    // If the distance is below a threshold, or already a leaf node, return force ...
     float_type inverse_dist = 1.0 / vec::distance(center_of_mass_, part.pos());
-    if ((area_.side * inverse_dist) < theta)
+    if ((area_.side * inverse_dist) < theta || particle_ != nullptr)
     {
         auto denominator = inverse_dist * inverse_dist;
         if (denominator > epsilon)
@@ -119,7 +121,8 @@ auto tree_node::calculate_acceleration(const particle& part) -> vec
         }
         return g_const * mass_ * denominator * (center_of_mass_ - part.pos()).normalized();
     }
-    
+
+    // ... otherwise, add up acceleration from child nodes
     auto force = vec(0.0, 0.0);
     for (const auto& child : children_)
     {
