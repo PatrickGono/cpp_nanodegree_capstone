@@ -28,11 +28,24 @@ public: // Interface
         position_distribution pos_dist, 
         velocity_distribution vel_dist, 
         uint64_t n_particles,
-        double max_speed, 
+        float_type max_speed, 
         bool add_central_body = true,
         double randomization_ratio = 0.0) -> std::vector<particle>;
 
 private: // Implementation
+    auto create_position_distribution(
+        position_distribution pos_dist, 
+        std::vector<particle>& particles,
+        uint64_t n_particles,
+        bool add_central_body) -> void;
+
+    auto create_velocity_distribution(
+        velocity_distribution vel_dist,
+        std::vector<particle>& particles,
+        float_type max_speed,
+        float_type randomization_ratio) -> void;
+
+private: // Helpers
     auto generate_random_vec() -> vec;
 
 private: // Variables

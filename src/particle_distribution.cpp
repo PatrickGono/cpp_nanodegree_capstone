@@ -14,15 +14,6 @@ particle_distribution::particle_distribution() : random_engine_{random_device_()
 
 ///
 ///
-auto particle_distribution::generate_random_vec() -> vec
-{
-    auto x = random_(random_engine_);
-    auto y = random_(random_engine_);
-    return vec(x, y);
-}
-
-///
-///
 auto particle_distribution::create_distribution(
     position_distribution pos_dist, 
     velocity_distribution vel_dist, 
@@ -34,6 +25,20 @@ auto particle_distribution::create_distribution(
     std::vector<particle> particles;
     particles.reserve(n_particles);
 
+    create_position_distribution(pos_dist, particles, n_particles, add_central_body);
+    create_velocity_distribution(vel_dist, particles, max_speed, randomization_ratio);
+
+    return particles;
+}
+
+///
+///
+auto particle_distribution::create_position_distribution(
+    position_distribution pos_dist, 
+    std::vector<particle>& particles,
+    uint64_t n_particles,
+    bool add_central_body) -> void
+{
     // create optional central body (~ black hole)
     size_t particle_index = 0;
     if (add_central_body)
@@ -73,7 +78,16 @@ auto particle_distribution::create_distribution(
             }
         }
     }
-    
+}
+
+///
+///
+auto particle_distribution::create_velocity_distribution(
+    velocity_distribution vel_dist,
+    std::vector<particle>& particles,
+    float_type max_speed,
+    float_type randomization_ratio) -> void
+{
     // adjust particle velocities according to the desired velocity distribution
     for (auto& particle : particles)
     {
@@ -105,6 +119,13 @@ auto particle_distribution::create_distribution(
             }
         }
     }
+}
 
-    return particles;
+///
+///
+auto particle_distribution::generate_random_vec() -> vec
+{
+    auto x = random_(random_engine_);
+    auto y = random_(random_engine_);
+    return vec(x, y);
 }
