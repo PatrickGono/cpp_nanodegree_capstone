@@ -22,6 +22,7 @@ public: // Structors
 public: // Accessors
     auto get_camera() -> camera&;
     auto get_running() -> bool&;
+    auto get_render_quad_tree() -> bool&;
     auto get_algorithm() -> algorithm&;
 
 public: // Interface
@@ -47,6 +48,7 @@ private: // Variables
     algorithm algorithm_;
     camera camera_;
     bool running_;
+    bool render_quad_tree_;
     int frame_count_;
     square_area area_;
 };

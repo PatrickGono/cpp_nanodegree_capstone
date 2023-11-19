@@ -4,6 +4,12 @@
 
 #include <memory>
 
+// Forward declaration
+class tree_node;
+
+// Typedefs
+typedef std::unique_ptr<tree_node> tree_node_array_type[4];
+
 struct square_area
 {
     square_area() : top_left_corner{vec()}, side(0.0) {}
@@ -13,18 +19,23 @@ struct square_area
     float_type side;
 };
 
-enum class quadrant
-{
-    top_left,
-    top_right,
-    bottom_left,
-    bottom_right,
-};
-
 class tree_node
 {
+public: // Enums
+    enum class quadrant
+    {
+        top_left,
+        top_right,
+        bottom_left,
+        bottom_right,
+    };
+
 public: // Structors
     tree_node(square_area area, tree_node* parent);
+
+public: // Accessors
+    auto children() const -> const tree_node_array_type&;
+    auto area() const -> const square_area&;
 
 public: // Interface
     auto insert_particle(particle* part) -> void;
@@ -39,7 +50,7 @@ private: // Implementation
     auto is_leaf() const -> bool;
 
 private: // Variables
-    std::unique_ptr<tree_node> children_[4];
+    tree_node_array_type children_;
     tree_node* parent_ = nullptr;
     particle* particle_ = nullptr;
     size_t n_particles_ = 0;

@@ -19,6 +19,7 @@ simulation::simulation(uint64_t n_particles)
    , camera_{}
    , algorithm_{algorithm::brute_force}
    , running_{false}
+   , render_quad_tree_{false}
    , frame_count_{0}
    , area_{vec(-1.0, -1.0), 2.0}
 {
@@ -40,6 +41,13 @@ auto simulation::get_running() -> bool&
 
 ///
 ///
+auto simulation::get_render_quad_tree() -> bool&
+{
+    return render_quad_tree_;
+}
+
+///
+///
 auto simulation::get_algorithm() -> algorithm&
 {
     return algorithm_;
@@ -56,6 +64,7 @@ auto simulation::run(renderer &renderer) -> void
         n_particles_, max_speed, true);
 
     frame_count_ = 0;
+    render_quad_tree_ = false;
     auto title_timestamp = SDL_GetTicks();
     running_ = true;
 
@@ -66,7 +75,28 @@ auto simulation::run(renderer &renderer) -> void
         auto frame_start = SDL_GetTicks();
 
         update();
-        renderer.render(particles_, camera_);
+
+        if (render_quad_tree_)
+        {
+            // Adjust area every n frames
+            if (frame_count_ % 10 == 0)
+            {
+                area_ = calculate_particles_bounds();
+            }
+        
+            // Build quad tree
+            auto quad_tree = tree_node(area_, nullptr);
+            for (auto& particle : particles_)
+            {
+                quad_tree.insert_particle(&particle);
+            }
+
+            renderer.render(quad_tree, particles_, camera_);
+        }
+        else
+        {
+            renderer.render(particles_, camera_);
+        }
 
         auto frame_end = SDL_GetTicks();
         ++frame_count_;

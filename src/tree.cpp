@@ -19,6 +19,20 @@ tree_node::tree_node(square_area area, tree_node* parent) : area_{area}, parent_
 
 ///
 ///
+auto tree_node::children() const -> const tree_node_array_type&
+{
+    return children_;
+}
+
+///
+///
+auto tree_node::area() const -> const square_area&
+{
+    return area_;
+}
+
+///
+///
 auto tree_node::insert_particle(particle* part) -> void
 {
     if (part->pos().x() < area_.top_left_corner.x() 

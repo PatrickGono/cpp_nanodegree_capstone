@@ -22,6 +22,13 @@ auto camera::transform(const vec& position) const -> vec
 
 ///
 ///
+auto camera::transform(float_type length) const -> float_type
+{
+    return length / zoom_level_;
+}
+
+///
+///
 auto camera::translate_x(bool left) -> void
 {
     position_.x() += zoom_level_ * (left ? -camera_zoom_speed : camera_zoom_speed);

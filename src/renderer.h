@@ -1,6 +1,7 @@
 #pragma once
 #include "camera.h"
 #include "particle.h"
+#include "tree.h"
 
 #include "SDL.h"
 
@@ -21,7 +22,13 @@ public: // Structors
 
 public: // Interface
     auto render(const std::vector<particle>& particles, const camera& cam) -> void;
+    auto render(const tree_node& tree, const std::vector<particle>& particles, const camera& cam) -> void;
     auto update_window_title(uint64_t n_particles, float_type total_energy, int fps) -> void;
+
+private: // Implementation
+    auto render_particles(const std::vector<particle>& particles, const camera& cam) -> void;
+    auto render_tree(const tree_node& tree, const camera& cam) -> void;
+    auto render_tree_nodes(std::vector<SDL_Rect>& rectangles, const tree_node& tree, const camera& cam) -> void;
 
 private: // Variables
     const std::size_t screen_width_;
