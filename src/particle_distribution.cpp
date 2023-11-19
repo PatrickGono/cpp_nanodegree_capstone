@@ -20,8 +20,7 @@ auto particle_distribution::create_distribution(
     velocity_distribution vel_dist, 
     uint64_t n_particles,
     float_type max_speed, 
-    bool add_central_body /* = true */,
-    float_type randomization_ratio /* = 0.0 */) -> std::vector<particle>
+    bool add_central_body /* = true */) -> std::vector<particle>
 {
     std::vector<particle> particles;
     particles.reserve(n_particles);
@@ -31,12 +30,12 @@ auto particle_distribution::create_distribution(
         case simulation_scenario::cluster_and_black_hole:
         {
             // Create cluster
-            auto cluster_n_particles = n_particles - 1;
-            auto center = vec(-0.3, -0.3);
-            auto velocity = vec(20, 12);
-            auto radius = 0.25;
+            const auto cluster_n_particles = n_particles - 1;
+            const auto center = vec(-0.3, -0.3);
+            const auto velocity = vec(20, 12);
+            const auto radius = 0.25;
 
-            auto cluster = create_cluster(center, velocity, radius, pos_dist, vel_dist, cluster_n_particles, max_speed, add_central_body, randomization_ratio);
+            const auto cluster = create_cluster(center, velocity, radius, pos_dist, vel_dist, cluster_n_particles, max_speed, add_central_body);
             particles.insert(particles.begin(), cluster.begin(), cluster.end());
 
             // Add black hole
@@ -49,18 +48,18 @@ auto particle_distribution::create_distribution(
         case simulation_scenario::two_clusters:
         {
             // Create first cluster
-            auto first_n_particles = n_particles / 2;
+            const auto first_n_particles = n_particles / 2;
             auto center = vec(-0.3, -0.3);
             auto velocity = vec(20, 12);
             auto radius = 0.25;
-            auto first_cluster = create_cluster(center, velocity, radius, pos_dist, vel_dist, first_n_particles, max_speed, add_central_body, randomization_ratio);
+            const auto first_cluster = create_cluster(center, velocity, radius, pos_dist, vel_dist, first_n_particles, max_speed, add_central_body);
     
             // Create second cluster
-            auto second_n_particles = n_particles - first_n_particles;
+            const auto second_n_particles = n_particles - first_n_particles;
             center = vec(0.3, 0.3);
             velocity = vec(-20, -12);
             radius = 0.25;
-            auto second_cluster = create_cluster(center, velocity, radius, pos_dist, vel_dist, second_n_particles, max_speed, add_central_body, randomization_ratio);
+            const auto second_cluster = create_cluster(center, velocity, radius, pos_dist, vel_dist, second_n_particles, max_speed, add_central_body);
     
             // Concatenate particles
             particles.insert(particles.begin(), first_cluster.begin(), first_cluster.end());
@@ -71,7 +70,7 @@ auto particle_distribution::create_distribution(
         default:
         {
             create_position_distribution(pos_dist, particles, n_particles, add_central_body);
-            create_velocity_distribution(vel_dist, particles, max_speed, randomization_ratio);
+            create_velocity_distribution(vel_dist, particles, max_speed);
             break;
         }
     }
@@ -87,7 +86,7 @@ auto particle_distribution::create_position_distribution(
     uint64_t n_particles,
     bool add_central_body) -> void
 {
-    // create optional central body (~ black hole)
+    // Create optional central body (~ black hole)
     size_t particle_index = 0;
     if (add_central_body)
     {
@@ -95,7 +94,7 @@ auto particle_distribution::create_position_distribution(
         ++particle_index;
     }
 
-    // create particles with the desired position distribution
+    // Create particles with the desired position distribution
     for (; particle_index < n_particles; ++particle_index)
     {
         switch (pos_dist)
@@ -133,10 +132,9 @@ auto particle_distribution::create_position_distribution(
 auto particle_distribution::create_velocity_distribution(
     velocity_distribution vel_dist,
     std::vector<particle>& particles,
-    float_type max_speed,
-    float_type randomization_ratio) -> void
+    float_type max_speed) -> void
 {
-    // adjust particle velocities according to the desired velocity distribution
+    // Adjust particle velocities according to the desired velocity distribution
     for (auto& part: particles)
     {
         switch (vel_dist)
@@ -156,13 +154,9 @@ auto particle_distribution::create_velocity_distribution(
             case velocity_distribution::rotating:
             default:
             {
-                auto random_direction = generate_random_vec().normalized();
-                auto random_factor = random_(random_engine_);
-                auto minimum_speed = (1 - randomization_ratio) * max_speed;
-                auto random_speed = random_factor * (max_speed - minimum_speed);
-                auto vx = minimum_speed * part.pos().y() * 2.0;
-                auto vy = -minimum_speed * part.pos().x() * 2.0;
-                part.vel() = vec(vx, vy) + random_speed * random_direction;
+                auto vx = max_speed * part.pos().y() * 2.0;
+                auto vy = -max_speed * part.pos().x() * 2.0;
+                part.vel() = vec(vx, vy);
                 break;
             }
         }
@@ -179,13 +173,12 @@ auto particle_distribution::create_cluster(
     velocity_distribution vel_dist,
     uint64_t n_particles,
     float_type max_speed,
-    bool add_central_body,
-    float_type randomization_ratio) -> std::vector<particle>
+    bool add_central_body) -> std::vector<particle>
 {
     std::vector<particle> particles;
     particles.reserve(n_particles);
     create_position_distribution(pos_dist, particles, n_particles, add_central_body);
-    create_velocity_distribution(vel_dist, particles, max_speed, randomization_ratio);
+    create_velocity_distribution(vel_dist, particles, max_speed);
     
     // Scale and shift second cluster
     for (auto& part : particles)

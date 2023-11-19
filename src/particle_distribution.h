@@ -37,8 +37,7 @@ public: // Interface
         velocity_distribution vel_dist, 
         uint64_t n_particles,
         float_type max_speed, 
-        bool add_central_body = true,
-        float_type randomization_ratio = 0.0) -> std::vector<particle>;
+        bool add_central_body = true) -> std::vector<particle>;
 
 private: // Implementation
     auto create_position_distribution(
@@ -50,8 +49,7 @@ private: // Implementation
     auto create_velocity_distribution(
         velocity_distribution vel_dist,
         std::vector<particle>& particles,
-        float_type max_speed,
-        float_type randomization_ratio) -> void;
+        float_type max_speed) -> void;
 
     auto create_cluster(
         vec center,
@@ -61,8 +59,7 @@ private: // Implementation
         velocity_distribution vel_dist,
         uint64_t n_particles,
         float_type max_speed,
-        bool add_central_body,
-        float_type randomization_ratio) -> std::vector<particle>;
+        bool add_central_body) -> std::vector<particle>;
 
 private: // Helpers
     auto generate_random_vec() -> vec;
