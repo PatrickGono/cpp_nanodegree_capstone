@@ -8,6 +8,7 @@ class particle_distribution
 public: // Enums
     enum class position_distribution
     {
+        two_clusters,
         random_sphere,
         random_square,
         galaxy
