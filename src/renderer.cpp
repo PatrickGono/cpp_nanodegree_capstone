@@ -49,7 +49,7 @@ renderer::~renderer()
 
 ///
 ///
-auto renderer::update_window_title(uint64_t n_particles, double total_energy, int fps) -> void
+auto renderer::update_window_title(uint64_t n_particles, float_type total_energy, int fps) -> void
 {
     std::string title{"Particles: " + std::to_string(n_particles) + " Energy: " + std::to_string(total_energy) + " FPS: " + std::to_string(fps)};
     SDL_SetWindowTitle(sdl_window_, title.c_str());

@@ -14,6 +14,6 @@ public: // Interface
     auto zoom(bool in) -> void;
 
 private:
-    double zoom_level_;
+    float_type zoom_level_;
     vec position_;
 };

@@ -17,7 +17,7 @@ private: // Implementation
     auto update() -> void;
     auto update_thread() -> void;
     auto update_barnes_hut() -> void;
-    auto compute_total_energy() -> double;
+    auto compute_total_energy() -> float_type;
 
 private: // Variables
     uint64_t n_particles_;

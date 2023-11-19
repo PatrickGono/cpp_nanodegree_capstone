@@ -21,7 +21,7 @@ public: // Structors
 
 public: // Interface
     auto render(const std::vector<particle>& particles, const camera& cam) -> void;
-    auto update_window_title(uint64_t n_particles, double total_energy, int fps) -> void;
+    auto update_window_title(uint64_t n_particles, float_type total_energy, int fps) -> void;
 
 private: // Variables
     const std::size_t screen_width_;

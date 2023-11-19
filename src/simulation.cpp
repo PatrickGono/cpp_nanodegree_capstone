@@ -5,11 +5,11 @@
 
 #include <thread>
 
-constexpr double delta_t = 0.00001;
-constexpr double half_delta_t_squared = 0.5 * delta_t * delta_t;
-constexpr double g_const = 0.1;
-constexpr double epsilon = 0.0001;
-constexpr double max_speed = 50.0;
+constexpr float_type delta_t = 0.00001;
+constexpr float_type half_delta_t_squared = 0.5 * delta_t * delta_t;
+constexpr float_type g_const = 0.1;
+constexpr float_type epsilon = 0.0001;
+constexpr float_type max_speed = 50.0;
 
 ///
 ///
@@ -21,9 +21,11 @@ simulation::simulation(uint64_t n_particles) : n_particles_{n_particles}, initia
 ///
 auto simulation::run(renderer &renderer) -> void
 {
-    particles_ = initial_distribution_.create_distribution(particle_distribution::position_distribution::random_sphere,
-                                                           particle_distribution::velocity_distribution::rotating,
-                                                           n_particles_, max_speed, true, 0.1);
+    particles_ = initial_distribution_.create_distribution(
+        particle_distribution::simulation_scenario::two_clusters,
+        particle_distribution::position_distribution::random_square,
+        particle_distribution::velocity_distribution::rotating,
+        n_particles_, max_speed, true);
 
     auto frame_count = 0;
     auto title_timestamp = SDL_GetTicks();
@@ -43,7 +45,7 @@ auto simulation::run(renderer &renderer) -> void
 
         if (frame_end - title_timestamp >= 1000)
         {
-            auto total_energy = 0.0; //compute_total_energy();
+            float_type total_energy = 0.0; //compute_total_energy();
             renderer.update_window_title(n_particles_, total_energy, frame_count);
             title_timestamp = frame_end;
             frame_count = 0;
@@ -93,7 +95,7 @@ auto simulation::update() -> void
     // 3) update velocities
     for (auto i = 0; i < particles_.size(); ++i)
     {
-        particles_.at(i).vel() += 0.5 * (accelerations.at(i) + particles_.at(i).acc()) * delta_t;
+        particles_.at(i).vel() += float_type(0.5) * (accelerations.at(i) + particles_.at(i).acc()) * delta_t;
         particles_.at(i).acc() = accelerations.at(i);
     }
 }
@@ -199,21 +201,21 @@ auto simulation::update_barnes_hut() -> void
     // 3) update velocities
     for (auto i = 0; i < particles_.size(); ++i)
     {
-        particles_.at(i).vel() += 0.5 * (accelerations.at(i) + particles_.at(i).acc()) * delta_t;
+        particles_.at(i).vel() += float_type(0.5) * (accelerations.at(i) + particles_.at(i).acc()) * delta_t;
         particles_.at(i).acc() = accelerations.at(i);
     }
 }
 
 ///
 ///
-auto simulation::compute_total_energy() -> double
+auto simulation::compute_total_energy() -> float_type
 {
-    auto potential_energy = 0.0;
-    auto kinetic_energy = 0.0;
+    float_type potential_energy = 0.0;
+    float_type kinetic_energy = 0.0;
 
     for (const auto& particle : particles_)
     {
-        kinetic_energy += 0.5 * particle.mass() * (particle.vel() * particle.vel());
+        kinetic_energy += float_type(0.5) * particle.mass() * (particle.vel() * particle.vel());
         for (const auto& other_particle : particles_)
         {
             if (&other_particle == &particle)

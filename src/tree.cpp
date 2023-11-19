@@ -109,7 +109,7 @@ auto tree_node::calculate_acceleration(const particle& part) -> vec
         return vec(0.0, 0.0);
     }
 
-    auto inverse_dist = 1.0 / vec::distance(center_of_mass_, part.pos());
+    float_type inverse_dist = 1.0 / vec::distance(center_of_mass_, part.pos());
     if ((area_.side * inverse_dist) < theta)
     {
         auto denominator = inverse_dist * inverse_dist;
