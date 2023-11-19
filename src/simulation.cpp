@@ -13,8 +13,34 @@ constexpr float_type max_speed = 50.0;
 
 ///
 ///
-simulation::simulation(uint64_t n_particles) : n_particles_{n_particles}, initial_distribution_{}, camera_{}
+simulation::simulation(uint64_t n_particles)
+   : n_particles_{n_particles}
+   , initial_distribution_{}
+   , camera_{}
+   , algorithm_{algorithm::barnes_hut}
+   , running_{false}
 {
+}
+
+///
+///
+auto simulation::get_camera() -> camera&
+{
+    return camera_;
+}
+
+///
+///
+auto simulation::get_running() -> bool&
+{
+    return running_;
+}
+
+///
+///
+auto simulation::get_algorithm() -> algorithm&
+{
+    return algorithm_;
 }
 
 ///
@@ -23,21 +49,21 @@ auto simulation::run(renderer &renderer) -> void
 {
     particles_ = initial_distribution_.create_distribution(
         particle_distribution::simulation_scenario::two_clusters,
-        particle_distribution::position_distribution::random_square,
+        particle_distribution::position_distribution::random_sphere,
         particle_distribution::velocity_distribution::rotating,
         n_particles_, max_speed, true);
 
     auto frame_count = 0;
     auto title_timestamp = SDL_GetTicks();
-    auto running = true;
+    running_ = true;
 
-    while (running)
+    while (running_)
     {
-        controller::handle_input(running, camera_);
+        controller::handle_input(*this);
 
         auto frame_start = SDL_GetTicks();
 
-        update_barnes_hut();
+        update();
         renderer.render(particles_, camera_);
 
         auto frame_end = SDL_GetTicks();
@@ -57,16 +83,47 @@ auto simulation::run(renderer &renderer) -> void
 ///
 auto simulation::update() -> void 
 {
-    // 1) update positions
+    // 1) Update positions
     for (auto& particle : particles_)
     {
         particle.pos() += particle.vel() * delta_t + particle.acc() * half_delta_t_squared;
     }
 
+    // 2) Calculate forces -> accelerations
     std::vector<vec> accelerations;
     accelerations.resize(n_particles_, vec());
+    switch (algorithm_)
+    {
+        case algorithm::parallel_brute_force:
+        {
+            calculate_brute_force_parallel(accelerations);
+            break;
+        }
+        case algorithm::barnes_hut:
+        {
+            calculate_barnes_hut(accelerations);
+            break;
+        }
+        case algorithm::brute_force:
+        default:
+        {
+            calculate_brute_force(accelerations);
+            break;
+        }
+    }
 
-    // 2) calculate forces -> accelerations
+    // 3) Update velocities
+    for (auto i = 0; i < particles_.size(); ++i)
+    {
+        particles_.at(i).vel() += float_type(0.5) * (accelerations.at(i) + particles_.at(i).acc()) * delta_t;
+        particles_.at(i).acc() = accelerations.at(i);
+    }
+}
+
+///
+///
+auto simulation::calculate_brute_force(std::vector<vec>& accelerations) const -> void
+{
     for (auto i = 0; i < particles_.size(); ++i)
     {
         auto pos_i = particles_.at(i).pos();
@@ -74,11 +131,6 @@ auto simulation::update() -> void
 
         for (auto j = i + 1; j < particles_.size(); ++j)
         {
-            if (i == j)
-            {
-                continue;
-            }
-
             auto pos_j = particles_.at(j).pos();
             auto mass_j = particles_.at(j).mass();
             auto denominator = vec::distance_squared(pos_i, pos_j);
@@ -91,33 +143,16 @@ auto simulation::update() -> void
             accelerations.at(j) -= force / mass_j;
         }
     }
-
-    // 3) update velocities
-    for (auto i = 0; i < particles_.size(); ++i)
-    {
-        particles_.at(i).vel() += float_type(0.5) * (accelerations.at(i) + particles_.at(i).acc()) * delta_t;
-        particles_.at(i).acc() = accelerations.at(i);
-    }
 }
 
 ///
 ///
-auto simulation::update_thread() -> void 
+auto simulation::calculate_brute_force_parallel(std::vector<vec>& accelerations) const -> void 
 {
-    // 1) update positions
-    for (auto& particle : particles_)
-    {
-        particle.pos() += particle.vel() * delta_t + particle.acc() * half_delta_t_squared;
-    }
-
-    std::vector<vec> accelerations;
-    accelerations.resize(n_particles_, vec());
-
     auto num_threads = std::thread::hardware_concurrency();
     std::vector<std::thread> threads;
     auto work_chunk_size = static_cast<decltype(num_threads)>(std::ceil(n_particles_ / num_threads));
 
-    // 2) calculate forces -> accelerations
     auto compute_forces = [&accelerations, this](size_t chunk_start, size_t chunk_end) {
         for (auto i = chunk_start; i < chunk_end; ++i)
         {
@@ -157,29 +192,13 @@ auto simulation::update_thread() -> void
     {
         thread.join();
     }
-
-    // 3) update velocities
-    for (auto i = 0; i < particles_.size(); ++i)
-    {
-        particles_.at(i).vel() += 0.5 * (accelerations.at(i) + particles_.at(i).acc()) * delta_t;
-        particles_.at(i).acc() = accelerations.at(i);
-    }
 }
 
 ///
 ///
-auto simulation::update_barnes_hut() -> void
+auto simulation::calculate_barnes_hut(std::vector<vec>& accelerations) -> void
 {
-    // 1) update positions
-    for (auto& particle : particles_)
-    {
-        particle.pos() += particle.vel() * delta_t + particle.acc() * half_delta_t_squared;
-    }
-
-    std::vector<vec> accelerations;
-    accelerations.resize(n_particles_, vec());
-
-    // build tree
+    // Build quad tree
     square_area area;
     area.side = 3.0;
     area.top_left_corner = vec(-1, -1);
@@ -189,20 +208,13 @@ auto simulation::update_barnes_hut() -> void
         quad_tree.insert_particle(&particle);
     }
 
-    // compute mass statistics
+    // Compute mass statistics
     quad_tree.calculate_center_of_mass();
 
-    // 2) calculate forces -> accelerations
+    // Compute accelerations
     for (auto i = 0; i < particles_.size(); ++i)
     {
         accelerations.at(i) = quad_tree.calculate_acceleration(particles_.at(i));
-    }
-
-    // 3) update velocities
-    for (auto i = 0; i < particles_.size(); ++i)
-    {
-        particles_.at(i).vel() += float_type(0.5) * (accelerations.at(i) + particles_.at(i).acc()) * delta_t;
-        particles_.at(i).acc() = accelerations.at(i);
     }
 }
 

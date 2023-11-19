@@ -1,14 +1,14 @@
 #pragma once
-#include "camera.h"
+#include "simulation.h"
 
 #include "SDL.h"
 
 class controller 
 {
 public: // Interface
-    static auto handle_input(bool& running, camera& cam) -> void;
+    static auto handle_input(simulation& sim) -> void;
 
 private: // Implementation
-    static auto handle_keyboard(const SDL_Event& event, camera& cam) -> void;
-    static auto handle_mouse(const SDL_Event& event, camera& cam) -> void;
+    static auto handle_keyboard(const SDL_Event& event, simulation& sim) -> void;
+    static auto handle_mouse(const SDL_Event& event,  simulation& sim) -> void;
 };
