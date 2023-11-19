@@ -6,9 +6,15 @@
 class particle_distribution
 {
 public: // Enums
+    enum class simulation_scenario
+    {
+        one_cluster,
+        two_clusters,
+        cluster_and_black_hole
+    };
+
     enum class position_distribution
     {
-        two_clusters,
         random_sphere,
         random_square,
         galaxy
@@ -26,6 +32,7 @@ public: // Structors
 
 public: // Interface
     auto create_distribution(
+        simulation_scenario scenario,
         position_distribution pos_dist, 
         velocity_distribution vel_dist, 
         uint64_t n_particles,

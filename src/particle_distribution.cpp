@@ -15,6 +15,7 @@ particle_distribution::particle_distribution() : random_engine_{random_device_()
 ///
 ///
 auto particle_distribution::create_distribution(
+    simulation_scenario scenario,
     position_distribution pos_dist, 
     velocity_distribution vel_dist, 
     uint64_t n_particles,
@@ -25,50 +26,80 @@ auto particle_distribution::create_distribution(
     std::vector<particle> particles;
     particles.reserve(n_particles);
 
-    if (pos_dist == position_distribution::two_clusters)
+    switch (scenario)
     {
-        // Create first cluster
-        auto first_n_particles = n_particles / 2;
-        std::vector<particle> first_cluster;
-        first_cluster.reserve(first_n_particles);
-        auto center = vec(-0.3, -0.3);
-        auto radius = 0.25;
-        create_position_distribution(position_distribution::random_sphere, first_cluster, first_n_particles, add_central_body);
-        create_velocity_distribution(vel_dist, first_cluster, max_speed, randomization_ratio);
-
-        // Scale and shift first cluster
-        for (auto& particle : first_cluster)
+        case simulation_scenario::cluster_and_black_hole:
         {
-            particle.pos() *= 2 * radius;
-            particle.pos() += center;
-            particle.vel() += vec(20, 12);
+            // Create cluster
+            auto cluster_n_particles = n_particles - 1;
+            auto center = vec(-0.3, -0.3);
+            auto radius = 0.25;
+            create_position_distribution(position_distribution::random_sphere, particles, cluster_n_particles, add_central_body);
+            create_velocity_distribution(vel_dist, particles, max_speed, randomization_ratio);
+    
+            // Scale and shift first cluster
+            for (auto& part : particles)
+            {
+                part.pos() *= 2 * radius;
+                part.pos() += center;
+                part.vel() += vec(20, 12);
+            }
+
+            // Add black hole
+            const auto black_hole_position = vec(0.3, 0.3);
+            const auto black_hole_velocity = vec(-20, -12);
+            const auto black_hole_mass = 2000;
+            particles.emplace_back(black_hole_position, black_hole_velocity, black_hole_mass);
+            break;
         }
-
-        // Create second cluster
-        auto second_n_particles = n_particles - first_n_particles;
-        std::vector<particle> second_cluster;
-        second_cluster.reserve(second_n_particles);
-        center = vec(0.3, 0.3);
-        radius = 0.25;
-        create_position_distribution(position_distribution::random_sphere, second_cluster, second_n_particles, add_central_body);
-        create_velocity_distribution(vel_dist, second_cluster, max_speed, randomization_ratio);
-
-        // Scale and shift second cluster
-        for (auto& particle : second_cluster)
+        case simulation_scenario::two_clusters:
         {
-            particle.pos() *= 2 * radius;
-            particle.pos() += center;
-            particle.vel() += vec(-20, -12);
+            // Create first cluster
+            auto first_n_particles = n_particles / 2;
+            std::vector<particle> first_cluster;
+            first_cluster.reserve(first_n_particles);
+            auto center = vec(-0.3, -0.3);
+            auto radius = 0.25;
+            create_position_distribution(position_distribution::random_sphere, first_cluster, first_n_particles, add_central_body);
+            create_velocity_distribution(vel_dist, first_cluster, max_speed, randomization_ratio);
+    
+            // Scale and shift first cluster
+            for (auto& part : first_cluster)
+            {
+                part.pos() *= 2 * radius;
+                part.pos() += center;
+                part.vel() += vec(20, 12);
+            }
+    
+            // Create second cluster
+            auto second_n_particles = n_particles - first_n_particles;
+            std::vector<particle> second_cluster;
+            second_cluster.reserve(second_n_particles);
+            center = vec(0.3, 0.3);
+            radius = 0.25;
+            create_position_distribution(position_distribution::random_sphere, second_cluster, second_n_particles, add_central_body);
+            create_velocity_distribution(vel_dist, second_cluster, max_speed, randomization_ratio);
+    
+            // Scale and shift second cluster
+            for (auto& part : second_cluster)
+            {
+                part.pos() *= 2 * radius;
+                part.pos() += center;
+                part.vel() += vec(-20, -12);
+            }
+    
+            // Concatenate particles
+            particles.insert(particles.begin(), first_cluster.begin(), first_cluster.end());
+            particles.insert(particles.end(), second_cluster.begin(), second_cluster.end());
+            break;
         }
-
-        // Concatenate particles
-        particles.insert(particles.begin(), first_cluster.begin(), first_cluster.end());
-        particles.insert(particles.end(), second_cluster.begin(), second_cluster.end());
-    }
-    else
-    {
-        create_position_distribution(pos_dist, particles, n_particles, add_central_body);
-        create_velocity_distribution(vel_dist, particles, max_speed, randomization_ratio);
+        case simulation_scenario::one_cluster:
+        default:
+        {
+            create_position_distribution(pos_dist, particles, n_particles, add_central_body);
+            create_velocity_distribution(vel_dist, particles, max_speed, randomization_ratio);
+            break;
+        }
     }
 
     return particles;
@@ -132,15 +163,15 @@ auto particle_distribution::create_velocity_distribution(
     float_type randomization_ratio) -> void
 {
     // adjust particle velocities according to the desired velocity distribution
-    for (auto& particle : particles)
+    for (auto& part: particles)
     {
         switch (vel_dist)
         {
             case velocity_distribution::random:
             {
-                auto velocity_direction = generate_random_vec().normalized();
+                auto velocity_direction = (generate_random_vec() - vec(0.5)).normalized();
                 auto speed = max_speed * random_(random_engine_);
-                particle.vel() = speed * velocity_direction;
+                part.vel() = speed * velocity_direction;
                 break;
             }
             case velocity_distribution::galaxy:
@@ -155,9 +186,9 @@ auto particle_distribution::create_velocity_distribution(
                 auto random_factor = random_(random_engine_);
                 auto minimum_speed = (1 - randomization_ratio) * max_speed;
                 auto random_speed = random_factor * (max_speed - minimum_speed);
-                auto vx = minimum_speed * particle.pos().y() * 2.0;
-                auto vy = -minimum_speed * particle.pos().x() * 2.0;
-                particle.vel() = vec(vx, vy) + random_speed * random_direction;
+                auto vx = minimum_speed * part.pos().y() * 2.0;
+                auto vy = -minimum_speed * part.pos().x() * 2.0;
+                part.vel() = vec(vx, vy) + random_speed * random_direction;
                 break;
             }
         }
