@@ -116,7 +116,7 @@ auto tree_node::print_node() const -> void
 
 ///
 ///
-auto tree_node::calculate_acceleration(const particle& part) -> vec
+auto tree_node::calculate_acceleration(const particle& part) const -> vec
 {
     // If it's the same particle as the one in the current node, no force
     if (particle_ == &part)
@@ -137,17 +137,17 @@ auto tree_node::calculate_acceleration(const particle& part) -> vec
     }
 
     // ... otherwise, add up acceleration from child nodes
-    auto force = vec(0.0, 0.0);
+    auto acceleration = vec(0.0);
     for (const auto& child : children_)
     {
         if (child == nullptr)
         {
             continue;
         }
-        force += child->calculate_acceleration(part);
+        acceleration += child->calculate_acceleration(part);
     }
 
-    return force;
+    return acceleration;
 }
 
 ///

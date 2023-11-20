@@ -14,7 +14,8 @@ public: // Enums
         brute_force,
         brute_force_threads,
         brute_force_async,
-        barnes_hut
+        barnes_hut,
+        barnes_hut_threads
     };
 
 public: // Structors
@@ -39,6 +40,8 @@ private: // Implementation
     auto calculate_brute_force_async(std::vector<vec>& accelerations) const -> void;
 
     auto calculate_barnes_hut(std::vector<vec>& accelerations) -> void;
+
+    auto calculate_barnes_hut_threads(std::vector<vec>& accelerations) -> void;
 
     auto compute_total_energy() -> float_type;
 

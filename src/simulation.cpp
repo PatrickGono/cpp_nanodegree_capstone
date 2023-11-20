@@ -18,7 +18,7 @@ simulation::simulation(uint64_t n_particles)
    : n_particles_{n_particles}
    , initial_distribution_{}
    , camera_{}
-   , algorithm_{algorithm::brute_force}
+   , algorithm_{algorithm::brute_force_parallel}
    , running_{false}
    , render_quad_tree_{false}
    , frame_count_{0}
@@ -142,6 +142,11 @@ auto simulation::update() -> void
             calculate_barnes_hut(accelerations);
             break;
         }
+        case algorithm::barnes_hut_threads:
+        {
+            calculate_barnes_hut_threads(accelerations);
+            break;
+        }
         case algorithm::brute_force:
         default:
         {
@@ -191,13 +196,13 @@ auto simulation::calculate_brute_force_threads(std::vector<vec>& accelerations) 
     std::vector<std::thread> threads;
     auto work_chunk_size = static_cast<decltype(num_threads)>(std::ceil(n_particles_ / num_threads));
 
-    auto compute_forces = [&accelerations, this](size_t chunk_start, size_t chunk_end) {
+    auto compute_accelerations = [&accelerations, this](size_t chunk_start, size_t chunk_end) {
         for (auto i = chunk_start; i < chunk_end; ++i)
         {
             auto pos_i = particles_.at(i).pos();
             auto mass_i = particles_.at(i).mass();
 
-            auto force = vec();
+            auto acceleration = vec();
 
             for (auto j = 0; j < particles_.size(); ++j)
             {
@@ -213,9 +218,9 @@ auto simulation::calculate_brute_force_threads(std::vector<vec>& accelerations) 
                 {
                     denominator = epsilon;
                 }
-                force += g_const * mass_i * mass_j / denominator * (pos_j - pos_i).normalized();
+                acceleration += g_const * mass_j / denominator * (pos_j - pos_i).normalized();
             }
-            accelerations.at(i) += force / mass_i;
+            accelerations.at(i) += acceleration;
         }
     };
 
@@ -223,7 +228,7 @@ auto simulation::calculate_brute_force_threads(std::vector<vec>& accelerations) 
     {
         auto chunk_start = thread_index * work_chunk_size;
         auto chunk_end = std::min(static_cast<unsigned int>(n_particles_), (thread_index + 1) * work_chunk_size);
-        threads.emplace_back(compute_forces, chunk_start, chunk_end);   
+        threads.emplace_back(compute_accelerations, chunk_start, chunk_end);   
     }
 
     for (auto& thread : threads)
@@ -240,13 +245,13 @@ auto simulation::calculate_brute_force_async(std::vector<vec>& accelerations) co
     std::vector<std::future<void>> futures;
     auto work_chunk_size = static_cast<decltype(num_threads)>(std::ceil(n_particles_ / num_threads));
 
-    auto compute_forces = [&accelerations, this](size_t chunk_start, size_t chunk_end) {
+    auto compute_accelerations = [&accelerations, this](size_t chunk_start, size_t chunk_end) {
         for (auto i = chunk_start; i < chunk_end; ++i)
         {
             auto pos_i = particles_.at(i).pos();
             auto mass_i = particles_.at(i).mass();
 
-            auto force = vec();
+            auto acceleration = vec();
 
             for (auto j = 0; j < particles_.size(); ++j)
             {
@@ -262,9 +267,9 @@ auto simulation::calculate_brute_force_async(std::vector<vec>& accelerations) co
                 {
                     denominator = epsilon;
                 }
-                force += g_const * mass_i * mass_j / denominator * (pos_j - pos_i).normalized();
+                acceleration += g_const * mass_j / denominator * (pos_j - pos_i).normalized();
             }
-            accelerations.at(i) += force / mass_i;
+            accelerations.at(i) += acceleration;
         }
     };
 
@@ -272,7 +277,7 @@ auto simulation::calculate_brute_force_async(std::vector<vec>& accelerations) co
     {
         auto chunk_start = thread_index * work_chunk_size;
         auto chunk_end = std::min(static_cast<unsigned int>(n_particles_), (thread_index + 1) * work_chunk_size);
-        auto future = std::async(std::launch::async, compute_forces, chunk_start, chunk_end);
+        auto future = std::async(std::launch::async, compute_accelerations, chunk_start, chunk_end);
         futures.emplace_back(std::move(future));
     }
 
@@ -306,6 +311,54 @@ auto simulation::calculate_barnes_hut(std::vector<vec>& accelerations) -> void
     for (auto i = 0; i < particles_.size(); ++i)
     {
         accelerations.at(i) = quad_tree.calculate_acceleration(particles_.at(i));
+    }
+}
+
+///
+///
+auto simulation::calculate_barnes_hut_threads(std::vector<vec>& accelerations) -> void
+{
+    // Adjust area every n frames
+    if (frame_count_ % 10 == 0)
+    {
+        area_ = calculate_particles_bounds();
+    }
+
+    // Build quad tree
+    auto quad_tree = tree_node(area_, nullptr);
+    for (auto& particle : particles_)
+    {
+        quad_tree.insert_particle(&particle);
+    }
+
+    // Compute mass statistics
+    quad_tree.calculate_center_of_mass();
+
+    // Define thread function
+    auto num_threads = std::thread::hardware_concurrency();
+    std::vector<std::thread> threads;
+    auto work_chunk_size = static_cast<decltype(num_threads)>(std::ceil(n_particles_ / num_threads));
+
+    auto compute_accelerations = [&accelerations, this, &quad_tree](size_t chunk_start, size_t chunk_end) {
+        for (auto i = chunk_start; i < chunk_end; ++i)
+        {
+            const auto acceleration = quad_tree.calculate_acceleration(particles_.at(i));
+            accelerations.at(i) += acceleration;
+        }
+    };
+
+    // Create thread objects
+    for (auto thread_index = 0u; thread_index < num_threads; thread_index++)
+    {
+        auto chunk_start = thread_index * work_chunk_size;
+        auto chunk_end = std::min(static_cast<unsigned int>(n_particles_), (thread_index + 1) * work_chunk_size);
+        threads.emplace_back(compute_accelerations, chunk_start, chunk_end);   
+    }
+
+    // Compute accelerations 
+    for (auto& thread : threads)
+    {
+        thread.join();
     }
 }
 

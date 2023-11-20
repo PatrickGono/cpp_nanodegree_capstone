@@ -72,6 +72,11 @@ auto controller::handle_keyboard(const SDL_Event& event, simulation& sim) -> voi
                 sim.get_algorithm() = simulation::algorithm::barnes_hut;
                 break;
             }
+            case SDLK_5:
+            {
+                sim.get_algorithm() = simulation::algorithm::barnes_hut_threads;
+                break;
+            }
             case SDLK_q:
             {
                 sim.get_render_quad_tree() = !sim.get_render_quad_tree();
