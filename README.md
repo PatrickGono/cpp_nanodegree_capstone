@@ -7,6 +7,20 @@ This Capstone project ([Udacity C++ Nanodegree Program](https://www.udacity.com/
 The implementation of the quadtree algorithm is inspired by this work:
 [Barnes-Hut-Simulator by Belt of Orion](https://github.com/beltoforion/Barnes-Hut-Simulator)
 
+The Barnes-Hut algorithm is explained here: [Barnes-Hut simulation](https://en.wikipedia.org/wiki/Barnes%E2%80%93Hut_simulation)
+
+## Features
+The project simulates one or more clusters of particles (e.g. stars) which interact via the gravitational force. Several algorithms are implemented to calculate the forces/accelerations:
+* brute force
+* brute force parallelized using `std::thread`
+* brute force parallelized using `std::async`
+* Barnes-Hut
+* Barnes-Hut parallelized using `std::thread`
+
+In the brute force approach, each pair of particles is evaluated, leading to an O(N<sup>2</sup>) complexity (where N is the number of bodies). This can be reduced to half by considering Newton's third law. However, this still leaves the same complexity.
+
+The Barnes-Hut algorithm relies on creating a spatial tree (quadtree in 2D, octree in 3D) of the particles, such that every particle is in its own leaf node. Each node has a center of mass and a mass corresponding to all the particles and nodes of its children. Next, a cutoff value (usually called `theta`) is chosen. If the ratio of the node size and the distance to a particle is smaller than this cutoff value, the center of mass and mass of the whole node is used instead of iterating over every particle. This allows to effectively skip evaluating particle pairs which are very far away, reducing the complexity to O(N log(N)).
+
 ## Dependencies for Running Locally
 * cmake >= 3.7
   * All OSes: [click here for installation instructions](https://cmake.org/install/)
