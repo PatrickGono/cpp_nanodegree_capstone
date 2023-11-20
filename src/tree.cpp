@@ -60,7 +60,7 @@ auto tree_node::insert_particle(particle* part) -> void
         }
 
         // subdivide and relocate current particle
-        auto quad = get_quadrant(particle_->pos());
+        const auto quad = get_quadrant(particle_->pos());
         if (children_[static_cast<size_t>(quad)] == nullptr)
         {
             children_[static_cast<size_t>(quad)] = create_node_for_quadrant(quad);
@@ -71,7 +71,7 @@ auto tree_node::insert_particle(particle* part) -> void
     }
 
     // insert new particle into its quadrant
-    auto quad = get_quadrant(part->pos());
+    const auto quad = get_quadrant(part->pos());
     if (children_[static_cast<size_t>(quad)] == nullptr)
     {
         children_[static_cast<size_t>(quad)] = create_node_for_quadrant(quad);
@@ -118,13 +118,13 @@ auto tree_node::print_node() const -> void
 ///
 auto tree_node::calculate_acceleration(const particle& part) const -> vec
 {
-    // If it's the same particle as the one in the current node, no force
+    // If it's the same particle as the one in the current node, no acceleration
     if (particle_ == &part)
     {
         return vec(0.0, 0.0);
     }
 
-    // If the distance is below a threshold, or already a leaf node, return force ...
+    // If the distance is below a threshold, or already a leaf node, return acceleration ...
     float_type inverse_dist = 1.0 / vec::distance(center_of_mass_, part.pos());
     if ((area_.side * inverse_dist) < theta || particle_ != nullptr)
     {
@@ -136,7 +136,7 @@ auto tree_node::calculate_acceleration(const particle& part) const -> vec
         return g_const * mass_ * denominator * (center_of_mass_ - part.pos()).normalized();
     }
 
-    // ... otherwise, add up acceleration from child nodes
+    // ... otherwise, add up accelerations from child nodes
     auto acceleration = vec(0.0);
     for (const auto& child : children_)
     {
@@ -154,7 +154,7 @@ auto tree_node::calculate_acceleration(const particle& part) const -> vec
 ///
 auto tree_node::calculate_center_of_mass() -> void
 {
-    // if this is a leaf node with a single particle, its mass and position are used
+    // If this is a leaf node with a single particle, its mass and position are used
     if (n_particles_ == 1)
     {
         center_of_mass_ = particle_->pos();
@@ -203,7 +203,7 @@ auto tree_node::get_quadrant(const vec& pos) -> quadrant
 auto tree_node::create_node_for_quadrant(quadrant quad) const -> std::unique_ptr<tree_node>
 {
     square_area new_area;
-    float_type new_side = area_.side * 0.5;
+    const float_type new_side = area_.side * 0.5;
     new_area.side = new_side;
 
     switch (quad)
