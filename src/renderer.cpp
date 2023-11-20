@@ -146,10 +146,10 @@ auto renderer::render_tree_nodes(std::vector<SDL_Rect>& rectangles, const tree_n
     SDL_Rect rectangle;
     auto rectangle_corner = cam.transform(tree.area().top_left_corner);
     auto rectangle_side = screen_width_ * cam.transform(tree.area().side);
-    rectangle.x = screen_width_ * rectangle_corner.x();
-    rectangle.y = screen_width_ * rectangle_corner.y();
-    rectangle.w = rectangle_side + 1;
-    rectangle.h = rectangle_side + 1;
+    rectangle.x = static_cast<int>(screen_width_ * rectangle_corner.x());
+    rectangle.y = static_cast<int>(screen_width_ * rectangle_corner.y());
+    rectangle.w = static_cast<int>(rectangle_side + 1);
+    rectangle.h = static_cast<int>(rectangle_side + 1);
     rectangles.push_back(rectangle);
 
     for (auto& child : tree.children())
