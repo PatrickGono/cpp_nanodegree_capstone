@@ -10,7 +10,7 @@ constexpr float_type delta_t = 0.00001;
 constexpr float_type half_delta_t_squared = 0.5 * delta_t * delta_t;
 constexpr float_type g_const = 0.1;
 constexpr float_type epsilon = 0.0001;
-constexpr float_type max_speed = 50.0;
+constexpr float_type max_speed = 100.0;
 
 ///
 ///
@@ -18,7 +18,7 @@ simulation::simulation(uint64_t n_particles)
    : n_particles_{n_particles}
    , initial_distribution_{}
    , camera_{}
-   , algorithm_{algorithm::brute_force_parallel}
+   , algorithm_{algorithm::brute_force_threads}
    , running_{false}
    , render_quad_tree_{false}
    , frame_count_{0}

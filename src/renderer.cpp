@@ -5,8 +5,10 @@
 #include <vector>
 #include <algorithm>
 
-constexpr size_t max_colors = 4;
-constexpr color colors[max_colors] = {{255, 255, 255, 255}, {255, 200, 150, 255}, {200, 150, 100, 255}, {150, 100, 50, 255}};
+constexpr size_t max_colors = 8;
+constexpr color colors[max_colors] = {
+    {255, 255, 255, 255}, {255, 230, 210, 255}, {255, 210, 175, 255}, {235, 190, 150, 255},
+    {225, 175, 125, 255}, {200, 150, 100, 255}, {175, 125, 75, 255}, {150, 100, 50, 255}};
 constexpr color background_color = {30, 30, 30, 255};
 constexpr color quad_tree_color = {90, 105, 125, 40};
 
