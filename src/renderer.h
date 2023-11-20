@@ -23,7 +23,7 @@ public: // Structors
 public: // Interface
     auto render(const std::vector<particle>& particles, const camera& cam) -> void;
     auto render(const tree_node& tree, const std::vector<particle>& particles, const camera& cam) -> void;
-    auto update_window_title(uint64_t n_particles, float_type total_energy, int fps) -> void;
+    auto update_window_title(uint64_t n_particles, int fps) -> void;
 
 private: // Implementation
     auto render_particles(const std::vector<particle>& particles, const camera& cam) -> void;

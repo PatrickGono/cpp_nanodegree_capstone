@@ -43,8 +43,6 @@ private: // Implementation
 
     auto calculate_barnes_hut_threads(std::vector<vec>& accelerations) -> void;
 
-    auto compute_total_energy() -> float_type;
-
     auto calculate_particles_bounds() const -> square_area;
 
 private: // Variables
