@@ -3,6 +3,7 @@
 #include "controller.h"
 #include "tree.h"
 
+#include <future>
 #include <thread>
 
 constexpr float_type delta_t = 0.00001;
@@ -126,9 +127,14 @@ auto simulation::update() -> void
     accelerations.resize(n_particles_, vec());
     switch (algorithm_)
     {
-        case algorithm::parallel_brute_force:
+        case algorithm::brute_force_threads:
         {
-            calculate_brute_force_parallel(accelerations);
+            calculate_brute_force_threads(accelerations);
+            break;
+        }
+        case algorithm::brute_force_async:
+        {
+            calculate_brute_force_async(accelerations);
             break;
         }
         case algorithm::barnes_hut:
@@ -179,7 +185,7 @@ auto simulation::calculate_brute_force(std::vector<vec>& accelerations) const ->
 
 ///
 ///
-auto simulation::calculate_brute_force_parallel(std::vector<vec>& accelerations) const -> void 
+auto simulation::calculate_brute_force_threads(std::vector<vec>& accelerations) const -> void 
 {
     auto num_threads = std::thread::hardware_concurrency();
     std::vector<std::thread> threads;
@@ -223,6 +229,56 @@ auto simulation::calculate_brute_force_parallel(std::vector<vec>& accelerations)
     for (auto& thread : threads)
     {
         thread.join();
+    }
+}
+
+///
+///
+auto simulation::calculate_brute_force_async(std::vector<vec>& accelerations) const -> void 
+{
+    auto num_threads = std::thread::hardware_concurrency();
+    std::vector<std::future<void>> futures;
+    auto work_chunk_size = static_cast<decltype(num_threads)>(std::ceil(n_particles_ / num_threads));
+
+    auto compute_forces = [&accelerations, this](size_t chunk_start, size_t chunk_end) {
+        for (auto i = chunk_start; i < chunk_end; ++i)
+        {
+            auto pos_i = particles_.at(i).pos();
+            auto mass_i = particles_.at(i).mass();
+
+            auto force = vec();
+
+            for (auto j = 0; j < particles_.size(); ++j)
+            {
+                if (i == j)
+                {
+                    continue;
+                }
+
+                auto pos_j = particles_.at(j).pos();
+                auto mass_j = particles_.at(j).mass();
+                auto denominator = vec::distance_squared(pos_i, pos_j);
+                if (denominator < epsilon)
+                {
+                    denominator = epsilon;
+                }
+                force += g_const * mass_i * mass_j / denominator * (pos_j - pos_i).normalized();
+            }
+            accelerations.at(i) += force / mass_i;
+        }
+    };
+
+    for (auto thread_index = 0u; thread_index < num_threads; thread_index++)
+    {
+        auto chunk_start = thread_index * work_chunk_size;
+        auto chunk_end = std::min(static_cast<unsigned int>(n_particles_), (thread_index + 1) * work_chunk_size);
+        auto future = std::async(std::launch::async, compute_forces, chunk_start, chunk_end);
+        futures.emplace_back(std::move(future));
+    }
+
+    for (auto& future : futures)
+    {
+        future.get();
     }
 }
 

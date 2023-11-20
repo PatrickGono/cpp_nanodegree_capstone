@@ -59,10 +59,15 @@ auto controller::handle_keyboard(const SDL_Event& event, simulation& sim) -> voi
             }
             case SDLK_2:
             {
-                sim.get_algorithm() = simulation::algorithm::parallel_brute_force;
+                sim.get_algorithm() = simulation::algorithm::brute_force_threads;
                 break;
             }
             case SDLK_3:
+            {
+                sim.get_algorithm() = simulation::algorithm::brute_force_async;
+                break;
+            }
+            case SDLK_4:
             {
                 sim.get_algorithm() = simulation::algorithm::barnes_hut;
                 break;

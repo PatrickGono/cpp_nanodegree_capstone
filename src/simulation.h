@@ -12,7 +12,8 @@ public: // Enums
     enum class algorithm
     {
         brute_force,
-        parallel_brute_force,
+        brute_force_threads,
+        brute_force_async,
         barnes_hut
     };
 
@@ -33,7 +34,9 @@ private: // Implementation
 
     auto calculate_brute_force(std::vector<vec>& accelerations) const -> void;
 
-    auto calculate_brute_force_parallel(std::vector<vec>& accelerations) const -> void;
+    auto calculate_brute_force_threads(std::vector<vec>& accelerations) const -> void;
+    
+    auto calculate_brute_force_async(std::vector<vec>& accelerations) const -> void;
 
     auto calculate_barnes_hut(std::vector<vec>& accelerations) -> void;
 
