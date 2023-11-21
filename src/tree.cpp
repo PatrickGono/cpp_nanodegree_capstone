@@ -5,7 +5,7 @@
 // TODO: move to a more reasonable place
 constexpr float_type theta = 0.5;
 constexpr float_type epsilon = 10000;
-constexpr float_type g_const = 0.1;
+constexpr float_type g_const = 1.0;
 
 ///
 ///

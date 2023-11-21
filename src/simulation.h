@@ -27,6 +27,10 @@ public: // Accessors
     auto get_render_quad_tree() -> bool&;
     auto get_algorithm() -> algorithm&;
 
+public: // Modifiers
+    auto speed_up_simulation() -> void;
+    auto slow_down_simulation() -> void;
+
 public: // Interface
     auto run(renderer &renderer) -> void;
   
@@ -57,4 +61,6 @@ private: // Variables
     bool render_quad_tree_;
     int frame_count_;
     square_area area_;
+    float_type delta_t_;
+    float_type half_delta_t_squared_;
 };

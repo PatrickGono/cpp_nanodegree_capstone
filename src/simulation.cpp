@@ -6,11 +6,9 @@
 #include <future>
 #include <thread>
 
-constexpr float_type delta_t = 0.00001;
-constexpr float_type half_delta_t_squared = 0.5 * delta_t * delta_t;
-constexpr float_type g_const = 0.1;
+constexpr float_type g_const = 1;
 constexpr float_type epsilon = 0.0001;
-constexpr float_type max_speed = 100.0;
+constexpr float_type max_speed = 250.0;
 
 ///
 ///
@@ -23,6 +21,8 @@ simulation::simulation(uint64_t n_particles)
    , render_quad_tree_{false}
    , frame_count_{0}
    , area_{vec(-1.0, -1.0), 2.0}
+   , delta_t_{0.000001}
+   , half_delta_t_squared_{0.5 * delta_t_ * delta_t_}
 {
 }
 
@@ -52,6 +52,22 @@ auto simulation::get_render_quad_tree() -> bool&
 auto simulation::get_algorithm() -> algorithm&
 {
     return algorithm_;
+}
+
+///
+///
+auto simulation::speed_up_simulation() -> void 
+{
+    delta_t_ *= 1.1;
+    half_delta_t_squared_ = 0.5 * delta_t_ * delta_t_;
+}
+
+///
+///
+auto simulation::slow_down_simulation() -> void 
+{
+    delta_t_ *= 0.9;
+    half_delta_t_squared_ = 0.5 * delta_t_ * delta_t_;
 }
 
 ///
@@ -107,7 +123,7 @@ auto simulation::update() -> void
     // 1) Update positions
     for (auto& particle : particles_)
     {
-        particle.pos() += particle.vel() * delta_t + particle.acc() * half_delta_t_squared;
+        particle.pos() += particle.vel() * delta_t_ + particle.acc() * half_delta_t_squared_;
     }
 
     // 2) Calculate forces -> accelerations
@@ -146,7 +162,7 @@ auto simulation::update() -> void
     // 3) Update velocities
     for (auto i = 0; i < particles_.size(); ++i)
     {
-        particles_.at(i).vel() += float_type(0.5) * (accelerations.at(i) + particles_.at(i).acc()) * delta_t;
+        particles_.at(i).vel() += float_type(0.5) * (accelerations.at(i) + particles_.at(i).acc()) * delta_t_;
         particles_.at(i).acc() = accelerations.at(i);
     }
 }
@@ -181,7 +197,7 @@ auto simulation::calculate_brute_force(std::vector<vec>& accelerations) const ->
 auto simulation::calculate_brute_force_threads(std::vector<vec>& accelerations) const -> void 
 {
     std::vector<std::thread> threads;
-    const auto num_threads = std::thread::hardware_concurrency();
+    const auto num_threads = std::thread::hardware_concurrency() / 2;
     const auto work_chunk_size = static_cast<decltype(num_threads)>(std::ceil(n_particles_ / num_threads));
 
     auto compute_accelerations = [&accelerations, this](size_t chunk_start, size_t chunk_end) {
@@ -230,7 +246,7 @@ auto simulation::calculate_brute_force_threads(std::vector<vec>& accelerations) 
 auto simulation::calculate_brute_force_async(std::vector<vec>& accelerations) const -> void 
 {
     std::vector<std::future<void>> futures;
-    const auto num_threads = std::thread::hardware_concurrency();
+    const auto num_threads = std::thread::hardware_concurrency() / 2;
     const auto work_chunk_size = static_cast<decltype(num_threads)>(std::ceil(n_particles_ / num_threads));
 
     auto compute_accelerations = [&accelerations, this](size_t chunk_start, size_t chunk_end) {
@@ -304,7 +320,7 @@ auto simulation::calculate_barnes_hut_threads(std::vector<vec>& accelerations) -
 
     // Define thread function
     std::vector<std::thread> threads;
-    const auto num_threads = std::thread::hardware_concurrency();
+    const auto num_threads = std::thread::hardware_concurrency() / 2;
     const auto work_chunk_size = static_cast<decltype(num_threads)>(std::ceil(n_particles_ / num_threads));
 
     auto compute_accelerations = [&accelerations, this, &quad_tree](size_t chunk_start, size_t chunk_end) {

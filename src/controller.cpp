@@ -28,6 +28,7 @@ auto controller::handle_keyboard(const SDL_Event& event, simulation& sim) -> voi
     {
         switch (event.key.keysym.sym) 
         {
+            // Camera controls
             case SDLK_UP:
             case SDLK_w:
             {
@@ -52,6 +53,7 @@ auto controller::handle_keyboard(const SDL_Event& event, simulation& sim) -> voi
                 sim.get_camera().translate_x(false);
                 break;
             }
+            // Algorithm selection
             case SDLK_1:
             {
                 sim.get_algorithm() = simulation::algorithm::brute_force;
@@ -77,9 +79,22 @@ auto controller::handle_keyboard(const SDL_Event& event, simulation& sim) -> voi
                 sim.get_algorithm() = simulation::algorithm::barnes_hut_threads;
                 break;
             }
+            // Rendering options
             case SDLK_q:
             {
                 sim.get_render_quad_tree() = !sim.get_render_quad_tree();
+                break;
+            }
+            // Simulation modifiers
+            case SDLK_t:
+            {
+                sim.speed_up_simulation();
+                break;
+            }
+            case SDLK_r:
+            {
+                sim.slow_down_simulation();
+                break;
             }
             default:
             {

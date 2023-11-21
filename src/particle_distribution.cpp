@@ -32,7 +32,7 @@ auto particle_distribution::create_distribution(
             // Create cluster
             const auto cluster_n_particles = n_particles - 1;
             const auto center = vec(-0.3, -0.3);
-            const auto velocity = vec(20, 12);
+            const auto velocity = vec(0.3 * max_speed, 0.2 * max_speed);
             const auto radius = 0.25;
 
             const auto cluster = create_cluster(center, velocity, radius, pos_dist, vel_dist, cluster_n_particles, max_speed, add_central_body);
@@ -40,7 +40,7 @@ auto particle_distribution::create_distribution(
 
             // Add black hole
             const auto black_hole_position = vec(0.3, 0.3);
-            const auto black_hole_velocity = vec(-20, -12);
+            const auto black_hole_velocity = vec(-0.3 * max_speed, -0.2 * max_speed);
             const auto black_hole_mass = 2000;
             particles.emplace_back(black_hole_position, black_hole_velocity, black_hole_mass);
             break;
@@ -50,14 +50,14 @@ auto particle_distribution::create_distribution(
             // Create first cluster
             const auto first_n_particles = n_particles / 2;
             auto center = vec(-0.3, -0.3);
-            auto velocity = vec(20, 12);
+            auto velocity = vec(0.3 * max_speed, 0.2 * max_speed);
             auto radius = 0.25;
             const auto first_cluster = create_cluster(center, velocity, radius, pos_dist, vel_dist, first_n_particles, max_speed, add_central_body);
     
             // Create second cluster
             const auto second_n_particles = n_particles - first_n_particles;
             center = vec(0.3, 0.3);
-            velocity = vec(-20, -12);
+            velocity = vec(-0.3 * max_speed, -0.2 * max_speed);
             radius = 0.25;
             const auto second_cluster = create_cluster(center, velocity, radius, pos_dist, vel_dist, second_n_particles, max_speed, add_central_body);
     
