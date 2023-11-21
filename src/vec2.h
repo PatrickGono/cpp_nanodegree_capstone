@@ -2,6 +2,17 @@
 #include <iostream>
 #include <cmath>
 
+// Forward declaration
+template<class T>
+class vec2;
+
+using float_type = double;
+using vec = vec2<float_type>;
+
+/// 
+/// 2D vector class with basic arithmetic operators.
+/// \tparam T Floating point type
+///
 template<class T>
 class vec2
 {
@@ -26,7 +37,7 @@ public: // Interface
     static auto distance_squared(const vec2<T>& first, const vec2<T>& second) -> T;
 
 public: // Operators
-    // multiplication
+    // Multiplication
     auto operator*=(T value) -> vec2<T>&;
 
     template<class S>
@@ -38,25 +49,25 @@ public: // Operators
     template<class S>
     friend auto operator*(const vec2<S>& first, S second) -> vec2<S>;
 
-    // division
+    // Division
     auto operator/=(T value) -> vec2<T>&;
 
     template<class S>
     friend auto operator/(const vec2<S>& first, S second) -> vec2<S>;
 
-    // addition 
+    // Addition 
     auto operator+=(const vec2<T>& other) -> vec2<T>&;
 
     template<class S>
     friend auto operator+(const vec2<S>& first, const vec2<S>& second) -> vec2<S>;
 
-    // subtraction
+    // Subtraction
     auto operator-=(const vec2<T>& other) -> vec2<T>&;
 
     template<class S>
     friend auto operator-(const vec2<S>& first, const vec2<S>& second) -> vec2<S>;
 
-    // print output
+    // Print output
     template<class S>
     friend auto operator<<(std::ostream& stream, const vec2<S>& vec) -> std::ostream&;
 
@@ -117,7 +128,7 @@ T vec2<T>::distance(const vec2<T>& first, const vec2<T>& second)
     return std::sqrt(distance_squared(first, second));
 }
 
-// multiplication
+// Multiplication
 
 ///
 ///
@@ -153,7 +164,7 @@ vec2<T>& vec2<T>::operator*=(T value)
     return *this;
 }
 
-// division
+// Division
 
 ///
 ///
@@ -173,7 +184,7 @@ vec2<T>& vec2<T>::operator/=(T value)
     return *this;
 }
 
-// addition & subtraction
+// Addition & subtraction
 
 ///
 ///
@@ -211,7 +222,7 @@ vec2<T>& vec2<T>::operator+=(const vec2<T>& vec)
     return *this;
 }
 
-// print output
+// Print output
 
 ///
 ///

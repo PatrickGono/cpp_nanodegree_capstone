@@ -14,6 +14,9 @@ struct color
     int r, g, b, a;
 };
 
+///
+/// Renderer class responsible for creating an SDL window and rendering onto it.
+///
 class renderer 
 {
 public: // Structors
@@ -21,13 +24,51 @@ public: // Structors
     ~renderer();
 
 public: // Interface
+    ///
+    /// Renders particles as a group of points using the camera view.
+    /// \param particles Container of particles to render
+    /// \param cam Handle to camera object
+    ///
     auto render(const std::vector<particle>& particles, const camera& cam) -> void;
+
+    ///
+    /// Renders particles as a group of points using the camera view.
+    /// Also renders the quad tree as a collection of rectangles.
+    ///
+    /// \param tree Quad tree to render
+    /// \param particles Container of particles to render
+    /// \param cam Handle to camera object
+    ///
     auto render(const tree_node& tree, const std::vector<particle>& particles, const camera& cam) -> void;
+
+    /// 
+    /// Updates the title of the window with the following information:
+    /// \param n_particles Number of particles
+    /// \param fps Frames per second 
+    /// 
     auto update_window_title(uint64_t n_particles, int fps) -> void;
 
 private: // Implementation
+    ///
+    /// Helper function doing the actual particle rendering.
+    /// \param particles Container of particles to render
+    /// \param cam Handle to camera object
+    ///
     auto render_particles(const std::vector<particle>& particles, const camera& cam) -> void;
+
+    ///
+    /// Helper function doing the actual tree rendering.
+    /// \param tree Quad tree to render
+    /// \param cam Handle to camera object
+    ///
     auto render_tree(const tree_node& tree, const camera& cam) -> void;
+
+    ///
+    /// Adds a rectangle for each node, recursively traversing the tree.
+    /// \param rectangles Container into which to add the rectangles
+    /// \param tree Quad tree to render
+    /// \param cam Handle to camera object
+    ///
     auto render_tree_nodes(std::vector<SDL_Rect>& rectangles, const tree_node& tree, const camera& cam) -> void;
 
 private: // Variables

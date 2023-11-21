@@ -81,7 +81,6 @@ auto tree_node::insert_particle(particle* part) -> void
     ++n_particles_;
 }
 
-
 ///
 ///
 auto tree_node::print_node() const -> void

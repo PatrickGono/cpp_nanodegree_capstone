@@ -19,6 +19,9 @@ struct square_area
     float_type side;
 };
 
+///
+/// A node in a quad tree. Has up to 4 children, and can hold a particle.
+///
 class tree_node
 {
 public: // Enums
@@ -38,15 +41,55 @@ public: // Accessors
     auto area() const -> const square_area&;
 
 public: // Interface
+    ///
+    /// Inserts the particle into the tree. Makes sure that at most 
+    /// 1 particle exists in any node by recursive subdivision. 
+    /// Doesn't take ownership of the particle object.
+    ///
+    /// \param part Particle to be inserted
+    ///
     auto insert_particle(particle* part) -> void;
+
+    /// 
+    /// Debug print-out of the node and all its children.
+    ///
     auto print_node() const -> void;
+
+    ///
+    /// Calculates the acceleration felt by the particle due to tree.
+    /// \param part Particle for which to calculate the acceleration
+    /// \return Acceleration
+    ///
     auto calculate_acceleration(const particle& part) const -> vec;
+
+    ///
+    /// Calculates the mass statistics for all children, recursively.
+    /// 
     auto calculate_center_of_mass() -> void;
 
 private: // Implementation 
+    ///
+    /// Returns into which quadrant of the node the position falls.
+    /// \param pos Position within the node area
+    /// \return Quadrant into which the position falls
+    ///
     auto get_quadrant(const vec& pos) -> quadrant;
+
+    /// 
+    /// Creates a child node for the specified quadrant.
+    /// \param quad Quadrant for which to add child node
+    /// \return Unique pointer to the new node
+    ///
     auto create_node_for_quadrant(quadrant quad) const -> std::unique_ptr<tree_node>;
+
+    /// 
+    /// \return True if this node is the root of the treea
+    ///
     auto is_root() const -> bool;
+
+    /// 
+    /// \return True if this node is a leaf (contains particle, no children)
+    ///
     auto is_leaf() const -> bool;
 
 private: // Variables

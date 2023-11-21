@@ -3,9 +3,9 @@
 
 #include <iostream>
 
-using float_type = double;
-using vec = vec2<float_type>;
-
+/// 
+/// Represents a single body in the n-body simulation
+///
 class particle
 {
 public: // Structors

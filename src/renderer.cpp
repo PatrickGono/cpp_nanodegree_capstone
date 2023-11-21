@@ -5,6 +5,7 @@
 #include <vector>
 #include <algorithm>
 
+// Color defines
 constexpr size_t max_colors = 8;
 constexpr color colors[max_colors] = {
     {255, 255, 255, 255}, {255, 230, 210, 255}, {255, 210, 175, 255}, {235, 190, 150, 255},
