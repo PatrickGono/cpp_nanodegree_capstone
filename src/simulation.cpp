@@ -4,6 +4,7 @@
 #include "tree.h"
 
 #include <future>
+#include <mutex>
 #include <thread>
 
 constexpr float_type g_const = 1;
@@ -185,7 +186,7 @@ auto simulation::calculate_brute_force(std::vector<vec>& accelerations) const ->
             {
                 denominator = epsilon;
             }
-            auto force = g_const * mass_i * mass_j / denominator * (pos_j - pos_i).normalized();
+            const auto force = g_const * mass_i * mass_j / denominator * (pos_j - pos_i).normalized();
             accelerations.at(i) += force / mass_i;
             accelerations.at(j) -= force / mass_j;
         }
@@ -196,11 +197,17 @@ auto simulation::calculate_brute_force(std::vector<vec>& accelerations) const ->
 ///
 auto simulation::calculate_brute_force_threads(std::vector<vec>& accelerations) const -> void 
 {
+    // Debug output to figure out best choice of thread count
+    const auto debug_output = false;
+    std::mutex cout_mutex;
+
     std::vector<std::thread> threads;
     const auto num_threads = std::thread::hardware_concurrency() / 2;
     const auto work_chunk_size = static_cast<decltype(num_threads)>(std::ceil(n_particles_ / num_threads));
 
-    auto compute_accelerations = [&accelerations, this](size_t chunk_start, size_t chunk_end) {
+    auto compute_accelerations = [&accelerations, &cout_mutex, debug_output, this](size_t chunk_start, size_t chunk_end) {
+        const auto start_time = SDL_GetTicks();
+
         for (auto i = chunk_start; i < chunk_end; ++i)
         {
             const auto& pos_i = particles_.at(i).pos();
@@ -225,6 +232,13 @@ auto simulation::calculate_brute_force_threads(std::vector<vec>& accelerations) 
                 acceleration += g_const * mass_j / denominator * (pos_j - pos_i).normalized();
             }
             accelerations.at(i) += acceleration;
+        }
+
+        const auto end_time = SDL_GetTicks();
+        if (debug_output)
+        {
+            std::lock_guard<std::mutex> lock(cout_mutex);
+            std::cout << "thread " << std::this_thread::get_id() << " finished in: " << end_time - start_time << "ms\n";
         }
     };
 
