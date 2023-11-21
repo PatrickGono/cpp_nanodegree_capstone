@@ -21,6 +21,22 @@ In the brute force approach, each pair of particles is evaluated, leading to an 
 
 The Barnes-Hut algorithm relies on creating a spatial tree (quadtree in 2D, octree in 3D) of the particles, such that every particle is in its own leaf node. Each node has a center of mass and a mass corresponding to all the particles and nodes of its children. Next, a cutoff value (usually called `theta`) is chosen. If the ratio of the node size and the distance to a particle is smaller than this cutoff value, the center of mass and mass of the whole node is used instead of iterating over every particle. This allows to effectively skip evaluating particle pairs which are very far away, reducing the complexity to O(N log(N)).
 
+Once the accelerations are calculated, a velocity Verlet algorithm is used to update the parameters of the particles (position, velocity) for the next simulation step.
+
+## Examples
+
+## Controls
+* **WASD** & **arrow keys**: Pan camera
+* **Mouse scroll wheel**: Zoom in and out
+* **Q**: Toggle quad tree rendering (irrespective of algorithm used)
+* **R**: Slow down simulation
+* **T**: Speed up simulation
+* **1**: Single-threaded brute force algorithm
+* **2**: Multi-threaded brute force algorithm
+* **3**: Multi-threaded brute force algorithm using `std::async`
+* **4**: Single-threaded Barnes-Hut algorithm
+* **5**: Multi-threaded Barnes-Hut algorithm
+
 ## Dependencies for Running Locally
 * cmake >= 3.7
   * All OSes: [click here for installation instructions](https://cmake.org/install/)
@@ -52,14 +68,14 @@ The Barnes-Hut algorithm relies on creating a spatial tree (quadtree in 2D, octr
 
 ### Compiling and Testing (1/1)
 * The submission must compile and run without errors on the Udacity project workspace. ✓
-  - Used the same dependencies as the start project, so should hopefully compile without any issues
+  - Used the same dependencies as the starting project, should hopefully compile without any issues
 
 ### Loops, Functions, I/O (3/4)
 * The project demonstrates an understanding of C++ functions and control structures. ✓ 
   - `simulation` class: `while` loop line XY, `for` loop line XY, `if` statement line XY, `switch` statement line XY
 * ~~The project reads data from a file and process the data, or the program writes data to a file.~~ 𐄂
 * The project accepts user input and processes the input. ✓ 
-  - `controller` class
+  - `controller` class processes keyboard and mouse input
 * The project uses data structures and immutable variables. ✓
   - `simulation` class uses `std::vector` on multiple occasions, as well as `const` variables whenever possible
   
@@ -85,16 +101,19 @@ The Barnes-Hut algorithm relies on creating a spatial tree (quadtree in 2D, octr
   - all variables are initialized whenever declared
 * ~~The project follows the Rule of 5.~~ 𐄂
 * The project uses move semantics to move data instead of copying it, where possible. ✓
-  - `tree.cpp` line 242 or `simulation.cpp` line XY
+  - `tree.cpp` line XY or `simulation.cpp` line XY
 * The project uses smart pointers instead of raw pointers. ✓
-  - `tree` uses smart pointers where ownership is intended, e.g. when adding child nodes to parent (`tree.h` line 52)
+  - `tree` uses smart pointers where ownership is intended, e.g. when adding child nodes to parent (`tree.h` line XY)
 
-### Concurrency (2/4)
+### Concurrency (3/4)
 * The project uses multithreading. ✓
-  - `simulation::calculate_brute_force_threads`, `simulation::calculate_brute_force_async`, `simulation::calculate_barnes_hut_threads`
+  - `simulation::calculate_brute_force_threads`
+  - `simulation::calculate_brute_force_async`
+  -  `simulation::calculate_barnes_hut_threads`
 * A promise and future is used in the project. ✓
   - `simulation::calculate_brute_force_async` line XY
-* ~~A mutex or lock is used in the project.~~ 𐄂
+* A mutex or lock is used in the project. ✓
+  - `simulation::calculate_brute_force_threads` line XY
 * ~~A condition variable is used in the project.~~ 𐄂
 
 ## CC Attribution-ShareAlike 4.0 International
