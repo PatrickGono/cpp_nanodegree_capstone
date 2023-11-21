@@ -28,24 +28,30 @@ The simulation allows the user to select from a range of possible scenarios, and
 ## Examples
 
 ## Controls
-* **WASD** & **arrow keys**: Pan camera
-* **Mouse scroll wheel**: Zoom in and out
-* **Space**: Pause simulation
-* **Q**: Toggle quad tree rendering (irrespective of algorithm used)
-* **R**: Slow down simulation
-* **T**: Speed up simulation
-* **1**: Single-threaded brute force algorithm
-* **2**: Multi-threaded brute force algorithm
-* **3**: Multi-threaded brute force algorithm using `std::async`
-* **4**: Single-threaded Barnes-Hut algorithm
-* **5**: Multi-threaded Barnes-Hut algorithm
-* **K**: Reduce the theta parameter (increases Barnes-Hut accuracy)
-* **L**: Increase the theta parameter (reduces Barnes-Hut accuracy)
-* **M**: Subtract 1000 particles and restart the simulation
-* **N**: Add 1000 particles and restart the simulation
-* **I**: Restart the simulation with a single cluster
-* **O**: Restart the simulation with two clusters
-* **P**: Restart the simulation with a cluster and "black hole"
+All keyboard shortcuts are lower case.
+1. Basic controls:
+    * **WASD** & **arrow keys**: Pan camera
+    * **Mouse scroll wheel**: Zoom in and out
+    * **Space**: Pause simulation
+    * **Q**: Toggle quad tree rendering (irrespective of algorithm used)
+2. Algorithm selection:
+    * **1**: Single-threaded brute force algorithm
+    * **2**: Multi-threaded brute force algorithm
+    * **3**: Multi-threaded brute force algorithm using `std::async`
+    * **4**: Single-threaded Barnes-Hut algorithm
+    * **5**: Multi-threaded Barnes-Hut algorithm
+3. Simulation parameters:
+    * **E**: Slow down simulation
+    * **R**: Reverse simulation (propagate backward in time)
+    * **T**: Speed up simulation
+    * **K**: Reduce the theta parameter (increases Barnes-Hut accuracy)
+    * **L**: Increase the theta parameter (reduces Barnes-Hut accuracy)
+4. Starting a new simulation:
+    * **N**: Add 1000 particles and restart the simulation
+    * **M**: Subtract 1000 particles and restart the simulation
+    * **I**: Restart the simulation with a single cluster
+    * **O**: Restart the simulation with two clusters
+    * **P**: Restart the simulation with a cluster and "black hole"
 
 ## Dependencies for Running Locally
 * cmake >= 3.7
