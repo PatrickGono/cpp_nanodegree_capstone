@@ -80,19 +80,7 @@ auto simulation::run(renderer &renderer) -> void
 
         if (render_quad_tree_)
         {
-            // Adjust area every n frames
-            if (frame_count_ % 10 == 0)
-            {
-                area_ = calculate_particles_bounds();
-            }
-        
-            // Build quad tree
-            auto quad_tree = tree_node(area_, nullptr);
-            for (auto& particle : particles_)
-            {
-                quad_tree.insert_particle(&particle);
-            }
-
+            const auto quad_tree = create_quad_tree();
             renderer.render(quad_tree, particles_, camera_);
         }
         else
@@ -291,18 +279,8 @@ auto simulation::calculate_brute_force_async(std::vector<vec>& accelerations) co
 ///
 auto simulation::calculate_barnes_hut(std::vector<vec>& accelerations) -> void
 {
-    // Adjust area every n frames
-    if (frame_count_ % 10 == 0)
-    {
-        area_ = calculate_particles_bounds();
-    }
-
     // Build quad tree
-    auto quad_tree = tree_node(area_, nullptr);
-    for (auto& particle : particles_)
-    {
-        quad_tree.insert_particle(&particle);
-    }
+    auto quad_tree = create_quad_tree();
 
     // Compute mass statistics
     quad_tree.calculate_center_of_mass();
@@ -318,18 +296,8 @@ auto simulation::calculate_barnes_hut(std::vector<vec>& accelerations) -> void
 ///
 auto simulation::calculate_barnes_hut_threads(std::vector<vec>& accelerations) -> void
 {
-    // Adjust area every n frames
-    if (frame_count_ % 10 == 0)
-    {
-        area_ = calculate_particles_bounds();
-    }
-
     // Build quad tree
-    auto quad_tree = tree_node(area_, nullptr);
-    for (auto& particle : particles_)
-    {
-        quad_tree.insert_particle(&particle);
-    }
+    auto quad_tree = create_quad_tree();
 
     // Compute mass statistics
     quad_tree.calculate_center_of_mass();
@@ -360,6 +328,26 @@ auto simulation::calculate_barnes_hut_threads(std::vector<vec>& accelerations) -
     {
         thread.join();
     }
+}
+
+///
+///
+auto simulation::create_quad_tree() -> tree_node
+{
+    // Adjust area every n frames
+    if (frame_count_ % 10 == 0)
+    {
+        area_ = calculate_particles_bounds();
+    }
+
+    // Build quad tree
+    auto quad_tree = tree_node(area_, nullptr);
+    for (auto& particle : particles_)
+    {
+        quad_tree.insert_particle(&particle);
+    }
+
+    return quad_tree;
 }
 
 ///

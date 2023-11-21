@@ -43,6 +43,8 @@ private: // Implementation
 
     auto calculate_barnes_hut_threads(std::vector<vec>& accelerations) -> void;
 
+    auto create_quad_tree() -> tree_node;
+
     auto calculate_particles_bounds() const -> square_area;
 
 private: // Variables
