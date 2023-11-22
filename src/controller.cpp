@@ -96,6 +96,21 @@ auto controller::handle_keyboard(const SDL_Event& event, simulation& sim) -> voi
                 sim.slow_down_simulation();
                 break;
             }
+            case SDLK_i:
+            {
+                sim.set_scenario(particle_distribution::simulation_scenario::one_cluster);
+                break;
+            }
+            case SDLK_o:
+            {
+                sim.set_scenario(particle_distribution::simulation_scenario::two_clusters);
+                break;
+            }
+            case SDLK_p:
+            {
+                sim.set_scenario(particle_distribution::simulation_scenario::cluster_and_black_hole);
+                break;
+            }
             default:
             {
                 // Do nothing

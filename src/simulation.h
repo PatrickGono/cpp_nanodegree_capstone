@@ -30,6 +30,8 @@ public: // Accessors
 public: // Modifiers
     auto speed_up_simulation() -> void;
     auto slow_down_simulation() -> void;
+    auto init() -> void;
+    auto set_scenario(particle_distribution::simulation_scenario scenario) -> void;
 
 public: // Interface
     auto run(renderer &renderer) -> void;
@@ -63,4 +65,5 @@ private: // Variables
     square_area area_;
     float_type delta_t_;
     float_type half_delta_t_squared_;
+    particle_distribution::simulation_scenario scenario_;
 };

@@ -24,6 +24,7 @@ simulation::simulation(uint64_t n_particles)
    , area_{vec(-1.0, -1.0), 2.0}
    , delta_t_{0.000001}
    , half_delta_t_squared_{0.5 * delta_t_ * delta_t_}
+   , scenario_{particle_distribution::simulation_scenario::one_cluster}
 {
 }
 
@@ -73,10 +74,10 @@ auto simulation::slow_down_simulation() -> void
 
 ///
 ///
-auto simulation::run(renderer &renderer) -> void
+auto simulation::init() -> void
 {
     particles_ = initial_distribution_.create_distribution(
-        particle_distribution::simulation_scenario::two_clusters,
+        scenario_,
         particle_distribution::position_distribution::random_sphere,
         particle_distribution::velocity_distribution::rotating,
         n_particles_, max_speed, true);
@@ -84,7 +85,21 @@ auto simulation::run(renderer &renderer) -> void
     frame_count_ = 0;
     render_quad_tree_ = false;
     running_ = true;
+}
 
+///
+///
+auto simulation::set_scenario(particle_distribution::simulation_scenario scenario) -> void
+{
+    scenario_ = scenario;
+    init();
+}
+
+///
+///
+auto simulation::run(renderer &renderer) -> void
+{
+    init();
     auto title_timestamp = SDL_GetTicks();
 
     while (running_)
