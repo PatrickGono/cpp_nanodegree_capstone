@@ -28,8 +28,9 @@ public: // Accessors
     auto get_algorithm() -> algorithm&;
 
 public: // Modifiers
-    auto speed_up_simulation() -> void;
     auto slow_down_simulation() -> void;
+    auto reverse_simulation() -> void;
+    auto speed_up_simulation() -> void;
     auto init() -> void;
     auto set_scenario(particle_distribution::simulation_scenario scenario) -> void;
 

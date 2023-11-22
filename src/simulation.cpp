@@ -58,17 +58,24 @@ auto simulation::get_algorithm() -> algorithm&
 
 ///
 ///
-auto simulation::speed_up_simulation() -> void 
+auto simulation::slow_down_simulation() -> void 
 {
-    delta_t_ *= 1.1;
+    delta_t_ *= 0.9;
     half_delta_t_squared_ = 0.5 * delta_t_ * delta_t_;
 }
 
 ///
 ///
-auto simulation::slow_down_simulation() -> void 
+auto simulation::reverse_simulation() -> void
 {
-    delta_t_ *= 0.9;
+    delta_t_ = -delta_t_;
+}
+
+///
+///
+auto simulation::speed_up_simulation() -> void 
+{
+    delta_t_ *= 1.1;
     half_delta_t_squared_ = 0.5 * delta_t_ * delta_t_;
 }
 

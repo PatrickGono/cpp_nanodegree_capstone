@@ -86,14 +86,19 @@ auto controller::handle_keyboard(const SDL_Event& event, simulation& sim) -> voi
                 break;
             }
             // Simulation modifiers
-            case SDLK_t:
+            case SDLK_e:
             {
-                sim.speed_up_simulation();
+                sim.slow_down_simulation();
                 break;
             }
             case SDLK_r:
             {
-                sim.slow_down_simulation();
+                sim.reverse_simulation();
+                break;
+            }
+            case SDLK_t:
+            {
+                sim.speed_up_simulation();
                 break;
             }
             case SDLK_i:
