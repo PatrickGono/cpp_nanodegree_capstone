@@ -38,13 +38,16 @@ public: // Modifiers
     auto slow_down_simulation() -> void;
     auto reverse_simulation() -> void;
     auto speed_up_simulation() -> void;
-    auto init() -> void;
     auto set_scenario(particle_distribution::simulation_scenario scenario) -> void;
+    auto increase_particles_by_1000_and_restart() -> void;
+    auto decrease_particles_by_1000_and_restart() -> void;
 
 public: // Interface
     auto run(renderer &renderer) -> void;
   
 private: // Implementation
+    auto init() -> void;
+
     auto update() -> void;
 
     auto calculate_brute_force(std::vector<vec>& accelerations) const -> void;

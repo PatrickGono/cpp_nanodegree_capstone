@@ -81,24 +81,28 @@ auto simulation::speed_up_simulation() -> void
 
 ///
 ///
-auto simulation::init() -> void
+auto simulation::set_scenario(particle_distribution::simulation_scenario scenario) -> void
 {
-    particles_ = initial_distribution_.create_distribution(
-        scenario_,
-        particle_distribution::position_distribution::random_sphere,
-        particle_distribution::velocity_distribution::rotating,
-        n_particles_, max_speed, true);
-
-    frame_count_ = 0;
-    render_quad_tree_ = false;
-    state_ = state::running;
+    scenario_ = scenario;
+    init();
 }
 
 ///
 ///
-auto simulation::set_scenario(particle_distribution::simulation_scenario scenario) -> void
+auto simulation::increase_particles_by_1000_and_restart() -> void
 {
-    scenario_ = scenario;
+    n_particles_ += 1000;
+    init();
+}
+
+///
+///
+auto simulation::decrease_particles_by_1000_and_restart() -> void
+{
+    if (n_particles_ > 1000)
+    {
+        n_particles_ -= 1000;
+    }
     init();
 }
 
@@ -146,6 +150,21 @@ auto simulation::run(renderer &renderer) -> void
             frame_count_ = 0;
         }
     }
+}
+
+///
+///
+auto simulation::init() -> void
+{
+    particles_ = initial_distribution_.create_distribution(
+        scenario_,
+        particle_distribution::position_distribution::random_sphere,
+        particle_distribution::velocity_distribution::rotating,
+        n_particles_, max_speed, true);
+
+    frame_count_ = 0;
+    render_quad_tree_ = false;
+    state_ = state::running;
 }
 
 ///
