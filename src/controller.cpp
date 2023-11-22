@@ -13,7 +13,8 @@ auto controller::handle_input(simulation& sim) -> void
     {
         if (event.type == SDL_QUIT) 
         {
-            sim.get_running() = false;
+            sim.get_state() = simulation::state::exiting;
+            break;
         } 
         handle_keyboard(event, sim);
         handle_mouse(event, sim);
@@ -28,7 +29,7 @@ auto controller::handle_keyboard(const SDL_Event& event, simulation& sim) -> voi
     {
         switch (event.key.keysym.sym) 
         {
-            // Camera controls
+            // Basic controls
             case SDLK_UP:
             case SDLK_w:
             {
@@ -51,6 +52,18 @@ auto controller::handle_keyboard(const SDL_Event& event, simulation& sim) -> voi
             case SDLK_d:
             {
                 sim.get_camera().translate_x(false);
+                break;
+            }
+            case SDLK_SPACE:
+            {
+                if (sim.get_state() == simulation::state::paused)
+                {
+                    sim.get_state() = simulation::state::running;
+                }
+                else
+                {
+                    sim.get_state() = simulation::state::paused;
+                }
                 break;
             }
             // Algorithm selection

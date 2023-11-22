@@ -16,15 +16,15 @@ constexpr float_type max_speed = 250.0;
 simulation::simulation(uint64_t n_particles)
    : n_particles_{n_particles}
    , initial_distribution_{}
-   , camera_{}
+   , scenario_{particle_distribution::simulation_scenario::one_cluster}
    , algorithm_{algorithm::brute_force_threads}
-   , running_{false}
    , render_quad_tree_{false}
    , frame_count_{0}
+   , state_{state::paused}
+   , camera_{}
    , area_{vec(-1.0, -1.0), 2.0}
    , delta_t_{0.000001}
    , half_delta_t_squared_{0.5 * delta_t_ * delta_t_}
-   , scenario_{particle_distribution::simulation_scenario::one_cluster}
 {
 }
 
@@ -37,9 +37,9 @@ auto simulation::get_camera() -> camera&
 
 ///
 ///
-auto simulation::get_running() -> bool&
+auto simulation::get_state() -> state&
 {
-    return running_;
+    return state_;
 }
 
 ///
@@ -91,7 +91,7 @@ auto simulation::init() -> void
 
     frame_count_ = 0;
     render_quad_tree_ = false;
-    running_ = true;
+    state_ = state::running;
 }
 
 ///
@@ -109,14 +109,22 @@ auto simulation::run(renderer &renderer) -> void
     init();
     auto title_timestamp = SDL_GetTicks();
 
-    while (running_)
+    while (state_ != state::exiting)
     {
         controller::handle_input(*this);
-
         auto frame_start = SDL_GetTicks();
 
-        update();
+        // Update simulation or wait
+        if (state_ == state::running)
+        {
+            update();
+        }
+        else if (state_ == state::paused)
+        {
+            SDL_Delay(16);
+        }
 
+        // Render
         if (render_quad_tree_)
         {
             const auto quad_tree = create_quad_tree();
@@ -127,6 +135,7 @@ auto simulation::run(renderer &renderer) -> void
             renderer.render(particles_, camera_);
         }
 
+        // Post-update
         auto frame_end = SDL_GetTicks();
         ++frame_count_;
 

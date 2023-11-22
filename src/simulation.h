@@ -18,12 +18,19 @@ public: // Enums
         barnes_hut_threads
     };
 
+    enum class state
+    {
+        running,
+        paused,
+        exiting
+    };
+
 public: // Structors
     simulation(uint64_t n_particles); 
 
 public: // Accessors
     auto get_camera() -> camera&;
-    auto get_running() -> bool&;
+    auto get_state() -> state&;
     auto get_render_quad_tree() -> bool&;
     auto get_algorithm() -> algorithm&;
 
@@ -58,13 +65,13 @@ private: // Variables
     uint64_t n_particles_;
     std::vector<particle> particles_;
     particle_distribution initial_distribution_;
+    particle_distribution::simulation_scenario scenario_;
     algorithm algorithm_;
-    camera camera_;
-    bool running_;
     bool render_quad_tree_;
     int frame_count_;
+    state state_;
+    camera camera_;
     square_area area_;
     float_type delta_t_;
     float_type half_delta_t_squared_;
-    particle_distribution::simulation_scenario scenario_;
 };
