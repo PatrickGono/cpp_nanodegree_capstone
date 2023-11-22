@@ -2,8 +2,6 @@
 
 #include <iostream>
 
-// TODO: move to a more reasonable place
-constexpr float_type theta = 0.5;
 constexpr float_type epsilon = 10000;
 constexpr float_type g_const = 1.0;
 
@@ -115,7 +113,7 @@ auto tree_node::print_node() const -> void
 
 ///
 ///
-auto tree_node::calculate_acceleration(const particle& part) const -> vec
+auto tree_node::calculate_acceleration(const particle& part, float_type theta) const -> vec
 {
     // If it's the same particle as the one in the current node, no acceleration
     if (particle_ == &part)
@@ -143,7 +141,7 @@ auto tree_node::calculate_acceleration(const particle& part) const -> vec
         {
             continue;
         }
-        acceleration += child->calculate_acceleration(part);
+        acceleration += child->calculate_acceleration(part, theta);
     }
 
     return acceleration;

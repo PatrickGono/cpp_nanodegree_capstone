@@ -41,6 +41,8 @@ public: // Modifiers
     auto set_scenario(particle_distribution::simulation_scenario scenario) -> void;
     auto increase_particles_by_1000_and_restart() -> void;
     auto decrease_particles_by_1000_and_restart() -> void;
+    auto increase_theta() -> void;
+    auto decrease_theta() -> void;
 
 public: // Interface
     auto run(renderer &renderer) -> void;
@@ -77,4 +79,5 @@ private: // Variables
     square_area area_;
     float_type delta_t_;
     float_type half_delta_t_squared_;
+    float_type theta_;
 };

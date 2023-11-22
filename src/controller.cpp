@@ -66,6 +66,12 @@ auto controller::handle_keyboard(const SDL_Event& event, simulation& sim) -> voi
                 }
                 break;
             }
+            // Rendering options
+            case SDLK_q:
+            {
+                sim.get_render_quad_tree() = !sim.get_render_quad_tree();
+                break;
+            }
             // Algorithm selection
             case SDLK_1:
             {
@@ -92,12 +98,6 @@ auto controller::handle_keyboard(const SDL_Event& event, simulation& sim) -> voi
                 sim.get_algorithm() = simulation::algorithm::barnes_hut_threads;
                 break;
             }
-            // Rendering options
-            case SDLK_q:
-            {
-                sim.get_render_quad_tree() = !sim.get_render_quad_tree();
-                break;
-            }
             // Simulation modifiers
             case SDLK_e:
             {
@@ -112,6 +112,16 @@ auto controller::handle_keyboard(const SDL_Event& event, simulation& sim) -> voi
             case SDLK_t:
             {
                 sim.speed_up_simulation();
+                break;
+            }
+            case SDLK_k:
+            {
+                sim.increase_theta();
+                break;
+            }
+            case SDLK_l:
+            {
+                sim.decrease_theta();
                 break;
             }
             case SDLK_i:

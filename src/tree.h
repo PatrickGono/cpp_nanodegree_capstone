@@ -58,9 +58,10 @@ public: // Interface
     ///
     /// Calculates the acceleration felt by the particle due to tree.
     /// \param part Particle for which to calculate the acceleration
+    /// \param theta Threshold parameter (0.0 - 1.0): smaller = more accurate
     /// \return Acceleration
     ///
-    auto calculate_acceleration(const particle& part) const -> vec;
+    auto calculate_acceleration(const particle& part, float_type theta) const -> vec;
 
     ///
     /// Calculates the mass statistics for all children, recursively.

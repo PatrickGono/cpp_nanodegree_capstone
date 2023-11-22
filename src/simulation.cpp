@@ -25,6 +25,7 @@ simulation::simulation(uint64_t n_particles)
    , area_{vec(-1.0, -1.0), 2.0}
    , delta_t_{0.000001}
    , half_delta_t_squared_{0.5 * delta_t_ * delta_t_}
+   , theta_{0.5}
 {
 }
 
@@ -104,6 +105,20 @@ auto simulation::decrease_particles_by_1000_and_restart() -> void
         n_particles_ -= 1000;
     }
     init();
+}
+
+///
+///
+auto simulation::increase_theta() -> void
+{
+    theta_ = std::min(1.0, theta_ + 0.1);
+}
+
+///
+///
+auto simulation::decrease_theta() -> void
+{
+    theta_ = std::max(0.0, theta_ - 0.1);
 }
 
 ///
@@ -368,7 +383,7 @@ auto simulation::calculate_barnes_hut(std::vector<vec>& accelerations) -> void
     // Compute accelerations
     for (auto i = 0; i < particles_.size(); ++i)
     {
-        accelerations.at(i) = quad_tree.calculate_acceleration(particles_.at(i));
+        accelerations.at(i) = quad_tree.calculate_acceleration(particles_.at(i), theta_);
     }
 }
 
@@ -390,7 +405,7 @@ auto simulation::calculate_barnes_hut_threads(std::vector<vec>& accelerations) -
     auto compute_accelerations = [&accelerations, this, &quad_tree](size_t chunk_start, size_t chunk_end) {
         for (auto i = chunk_start; i < chunk_end; ++i)
         {
-            const auto acceleration = quad_tree.calculate_acceleration(particles_.at(i));
+            const auto acceleration = quad_tree.calculate_acceleration(particles_.at(i), theta_);
             accelerations.at(i) += acceleration;
         }
     };
