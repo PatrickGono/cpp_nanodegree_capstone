@@ -42,6 +42,7 @@ auto tree_node::insert_particle(particle* part) -> void
         return;
     }
 
+    // If no particle present, place it into the node and return
     if (n_particles_ == 0)
     {
         particle_ = part;
@@ -49,6 +50,7 @@ auto tree_node::insert_particle(particle* part) -> void
         return;
     }
 
+    // Otherwise, subdivide, and move the existing and new particle to child nodes
     if (n_particles_ == 1)
     {
         if (!is_root() && !is_leaf())
@@ -57,7 +59,7 @@ auto tree_node::insert_particle(particle* part) -> void
             return;
         }
 
-        // subdivide and relocate current particle
+        // Subdivide and relocate current particle
         const auto quad = get_quadrant(particle_->pos());
         if (children_[static_cast<size_t>(quad)] == nullptr)
         {
@@ -68,7 +70,7 @@ auto tree_node::insert_particle(particle* part) -> void
         particle_ = nullptr;
     }
 
-    // insert new particle into its quadrant
+    // Insert new particle into its quadrant
     const auto quad = get_quadrant(part->pos());
     if (children_[static_cast<size_t>(quad)] == nullptr)
     {
