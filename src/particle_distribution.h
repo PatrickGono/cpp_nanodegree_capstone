@@ -97,13 +97,21 @@ private: // Implementation
 private: // Helpers
     ///
     /// Creates a vector with random x and y coordinates ranging 
-    /// from 0.0 to 1.0. Note that the vector is not normalized!
+    /// uniformly from 0.0 to 1.0. The vector is not normalized!
     /// \return Random vector
     ///
-    auto generate_random_vec() -> vec;
+    auto generate_random_vec_uniform() -> vec;
+
+    ///
+    /// Creates a vector with random radial and angle coordinates following the 
+    /// Cauchy distribution for the radial coordinate. The vector is not normalized!
+    /// \return Random vector
+    ///
+    auto generate_random_vec_galaxy() -> vec;
 
 private: // Variables
     std::random_device random_device_;
     std::mt19937 random_engine_;
-    std::uniform_real_distribution<float_type> random_;
+    std::uniform_real_distribution<float_type> random_uniform_;
+    std::cauchy_distribution<float_type> random_cauchy_;
 };

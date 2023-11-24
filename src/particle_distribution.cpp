@@ -2,13 +2,18 @@
 
 #include "vec2.h"
 
+#include <math.h>
+#include <numeric>
 #include <random>
 
 constexpr float_type central_body_mass = 1000.0;
+constexpr float_type gamma = 0.25;
+constexpr float_type pi = 3.14159265358979311600;
+constexpr float_type g_const = 1.0;
 
 ///
 ///
-particle_distribution::particle_distribution() : random_engine_{random_device_()}, random_{0, 1}
+particle_distribution::particle_distribution() : random_engine_{random_device_()}, random_uniform_{0, 1}, random_cauchy_{0, gamma}
 {
 }
 
@@ -101,12 +106,12 @@ auto particle_distribution::create_position_distribution(
         {
             case position_distribution::galaxy:
             {
-                // TODO implement some sort of galactic distribution
-                // fallthrough for now!
+                particles.emplace_back(generate_random_vec_galaxy(), vec(), 1.0);
+                break;
             }
             case position_distribution::random_square:
             {
-                particles.emplace_back(generate_random_vec() - vec(0.5), vec(), 1.0);
+                particles.emplace_back(generate_random_vec_uniform() - vec(0.5), vec(), 1.0);
                 break;
             }
             case position_distribution::random_sphere:
@@ -114,7 +119,7 @@ auto particle_distribution::create_position_distribution(
             {
                 while (true)
                 {
-                    auto random_vec = generate_random_vec() - vec(0.5);
+                    auto random_vec = generate_random_vec_uniform() - vec(0.5);
                     if (vec::distance(random_vec, vec(0.0)) < 0.5)
                     {
                         particles.emplace_back(random_vec, vec(), 1.0);
@@ -134,29 +139,65 @@ auto particle_distribution::create_velocity_distribution(
     std::vector<particle>& particles,
     float_type max_speed) -> void
 {
+    // Sort particles by distance from center in case of galaxy and calculate masses
+    auto masses_of_particles_closer_to_center = std::vector<float_type>{};
+    if (vel_dist == velocity_distribution::galaxy)
+    {
+        std::sort(particles.begin(), particles.end(), [](const auto& first, const auto& second)
+        {
+            return first.pos().length_squared() < second.pos().length_squared();
+        });
+
+        masses_of_particles_closer_to_center.reserve(particles.size());
+        for (const auto& part : particles)
+        {
+            masses_of_particles_closer_to_center.push_back(part.mass());
+        }
+
+        std::partial_sum(
+            masses_of_particles_closer_to_center.begin(), 
+            masses_of_particles_closer_to_center.end(), 
+            masses_of_particles_closer_to_center.begin());
+    }
+
     // Adjust particle velocities according to the desired velocity distribution
-    for (auto& part: particles)
+    for (auto iter = particles.begin(); iter < particles.end(); ++iter)
     {
         switch (vel_dist)
         {
             case velocity_distribution::random:
             {
-                auto velocity_direction = (generate_random_vec() - vec(0.5)).normalized();
-                auto speed = max_speed * random_(random_engine_);
-                part.vel() = speed * velocity_direction;
+                auto velocity_direction = (generate_random_vec_uniform() - vec(0.5)).normalized();
+                auto speed = max_speed * random_uniform_(random_engine_);
+                iter->vel() = speed * velocity_direction;
                 break;
             }
             case velocity_distribution::galaxy:
             {
-                // TODO generate galactic velocity distribution
-                // fallthrough for now!
+                // Calculates orbital velocities using the 2D shell theorem for gravity.
+                const auto index = std::distance(particles.begin(), iter);
+                const auto dist = iter->pos().length();
+                if (dist <= 0.00001)
+                {
+                    iter->vel() = vec(0);
+                    break;
+                }
+                const auto mass_inside_shell = masses_of_particles_closer_to_center.at(index);
+                auto speed = std::sqrt(g_const * mass_inside_shell / dist);
+                // Slow down particles near the center with heuristic factor.
+                speed *= dist / (dist + 0.005);
+                const auto vx = iter->pos().y();
+                const auto vy = -iter->pos().x();
+                const auto velocity_direction = vec(vx, vy).normalized();
+                iter->vel() = speed * velocity_direction;
+                break;
             }
             case velocity_distribution::rotating:
             default:
             {
-                auto vx = max_speed * part.pos().y() * 2.0;
-                auto vy = -max_speed * part.pos().x() * 2.0;
-                part.vel() = vec(vx, vy);
+                auto vx = max_speed * iter->pos().y() * 2.0;
+                auto vy = -max_speed * iter->pos().x() * 2.0;
+                iter->vel() = vec(vx, vy);
                 break;
             }
         }
@@ -193,9 +234,20 @@ auto particle_distribution::create_cluster(
 
 ///
 ///
-auto particle_distribution::generate_random_vec() -> vec
+auto particle_distribution::generate_random_vec_uniform() -> vec
 {
-    auto x = random_(random_engine_);
-    auto y = random_(random_engine_);
+    auto x = random_uniform_(random_engine_);
+    auto y = random_uniform_(random_engine_);
+    return vec(x, y);
+}
+
+///
+///
+auto particle_distribution::generate_random_vec_galaxy() -> vec
+{
+    const auto ur = random_cauchy_(random_engine_);
+    const auto ut = random_uniform_(random_engine_);
+    const auto x = 0.5 * ur * std::cos(2 * pi * ut);
+    const auto y = 0.5 * ur * std::sin(2 * pi * ut);
     return vec(x, y);
 }

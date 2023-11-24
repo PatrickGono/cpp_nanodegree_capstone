@@ -173,8 +173,8 @@ auto simulation::init() -> void
 {
     particles_ = initial_distribution_.create_distribution(
         scenario_,
-        particle_distribution::position_distribution::random_sphere,
-        particle_distribution::velocity_distribution::rotating,
+        particle_distribution::position_distribution::galaxy,
+        particle_distribution::velocity_distribution::galaxy,
         n_particles_, max_speed, true);
 
     frame_count_ = 0;
