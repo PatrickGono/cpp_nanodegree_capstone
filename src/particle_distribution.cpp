@@ -34,7 +34,7 @@ auto particle_distribution::create_distribution(
     {
         case simulation_scenario::cluster_and_black_hole:
         {
-            // Create cluster
+            // Create cluster.
             const auto cluster_n_particles = n_particles - 1;
             const auto center = vec(-0.3, -0.3);
             const auto velocity = vec(0.3 * max_speed, 0.2 * max_speed);
@@ -43,7 +43,7 @@ auto particle_distribution::create_distribution(
             const auto cluster = create_cluster(center, velocity, radius, pos_dist, vel_dist, cluster_n_particles, max_speed, add_central_body);
             particles.insert(particles.begin(), cluster.begin(), cluster.end());
 
-            // Add black hole
+            // Add black hole.
             const auto black_hole_position = vec(0.3, 0.3);
             const auto black_hole_velocity = vec(-0.3 * max_speed, -0.2 * max_speed);
             const auto black_hole_mass = 2000;
@@ -52,21 +52,21 @@ auto particle_distribution::create_distribution(
         }
         case simulation_scenario::two_clusters:
         {
-            // Create first cluster
+            // Create first cluster.
             const auto first_n_particles = n_particles / 2;
             auto center = vec(-0.3, -0.3);
             auto velocity = vec(0.3 * max_speed, 0.2 * max_speed);
             auto radius = 0.25;
             const auto first_cluster = create_cluster(center, velocity, radius, pos_dist, vel_dist, first_n_particles, max_speed, add_central_body);
     
-            // Create second cluster
+            // Create second cluster.
             const auto second_n_particles = n_particles - first_n_particles;
             center = vec(0.3, 0.3);
             velocity = vec(-0.3 * max_speed, -0.2 * max_speed);
             radius = 0.25;
             const auto second_cluster = create_cluster(center, velocity, radius, pos_dist, vel_dist, second_n_particles, max_speed, add_central_body);
     
-            // Concatenate particles
+            // Concatenate particles.
             particles.insert(particles.begin(), first_cluster.begin(), first_cluster.end());
             particles.insert(particles.end(), second_cluster.begin(), second_cluster.end());
             break;
@@ -91,7 +91,7 @@ auto particle_distribution::create_position_distribution(
     uint64_t n_particles,
     bool add_central_body) -> void
 {
-    // Create optional central body (~ black hole)
+    // Create optional central body (~ black hole).
     size_t particle_index = 0;
     if (add_central_body)
     {
@@ -99,7 +99,7 @@ auto particle_distribution::create_position_distribution(
         ++particle_index;
     }
 
-    // Create particles with the desired position distribution
+    // Create particles with the desired position distribution.
     for (; particle_index < n_particles; ++particle_index)
     {
         switch (pos_dist)
@@ -160,7 +160,7 @@ auto particle_distribution::create_velocity_distribution(
             masses_of_particles_closer_to_center.begin());
     }
 
-    // Adjust particle velocities according to the desired velocity distribution
+    // Adjust particle velocities according to the desired velocity distribution.
     for (auto iter = particles.begin(); iter < particles.end(); ++iter)
     {
         switch (vel_dist)
@@ -221,7 +221,7 @@ auto particle_distribution::create_cluster(
     create_position_distribution(pos_dist, particles, n_particles, add_central_body);
     create_velocity_distribution(vel_dist, particles, max_speed);
     
-    // Scale and shift second cluster
+    // Scale and shift cluster.
     for (auto& part : particles)
     {
         part.pos() *= 2 * radius;
@@ -245,9 +245,16 @@ auto particle_distribution::generate_random_vec_uniform() -> vec
 ///
 auto particle_distribution::generate_random_vec_galaxy() -> vec
 {
-    const auto ur = random_cauchy_(random_engine_);
-    const auto ut = random_uniform_(random_engine_);
-    const auto x = 0.5 * ur * std::cos(2 * pi * ut);
-    const auto y = 0.5 * ur * std::sin(2 * pi * ut);
-    return vec(x, y);
+    auto distance = 2.0;
+    auto vector = vec();
+    while (distance > 1.0)
+    {
+        const auto ur = random_cauchy_(random_engine_);
+        distance = std::abs(ur);
+        const auto ut = random_uniform_(random_engine_);
+        const auto x = 0.5 * ur * std::cos(2 * pi * ut);
+        const auto y = 0.5 * ur * std::sin(2 * pi * ut);
+        vector = vec(x, y);
+    }
+    return vector;
 }
