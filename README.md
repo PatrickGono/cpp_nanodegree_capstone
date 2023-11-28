@@ -26,6 +26,10 @@ Once the accelerations are calculated, a velocity Verlet algorithm is used to up
 The simulation allows the user to select from a range of possible scenarios, and to modify the simulation parameters, such as the time step, the theta parameter of the Barnes-Hut algorithm, or the number of particles.
 
 ## Examples
+![Small galaxy](resources/images/small_galaxy.png)
+![Large galaxy](resources/images/large_galaxy_falling_apart.png)
+![Two galaxies colliding](resources/images/galaxies_on_collision_course.png)
+![Quad tree visualization](resources/images/quad_tree.png)
 
 ## Controls
 All keyboard shortcuts are lower case.
