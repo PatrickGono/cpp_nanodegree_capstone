@@ -139,7 +139,7 @@ auto particle_distribution::create_velocity_distribution(
     std::vector<particle>& particles,
     float_type max_speed) -> void
 {
-    // Sort particles by distance from center in case of galaxy and calculate masses
+    // Sort particles by distance from center in case of galaxy and calculate masses.
     auto masses_of_particles_closer_to_center = std::vector<float_type>{};
     if (vel_dist == velocity_distribution::galaxy)
     {
