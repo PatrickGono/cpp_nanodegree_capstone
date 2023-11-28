@@ -2,18 +2,19 @@
 
 #include "vec2.h"
 
+#include <algorithm>
 #include <math.h>
 #include <numeric>
 #include <random>
 
 constexpr float_type central_body_mass = 1000.0;
-constexpr float_type gamma = 0.25;
+constexpr float_type gamma_const = 0.25;
 constexpr float_type pi = 3.14159265358979311600;
 constexpr float_type g_const = 1.0;
 
 ///
 ///
-particle_distribution::particle_distribution() : random_engine_{random_device_()}, random_uniform_{0, 1}, random_cauchy_{0, gamma}
+particle_distribution::particle_distribution() : random_engine_{random_device_()}, random_uniform_{0, 1}, random_cauchy_{0, gamma_const}
 {
 }
 
