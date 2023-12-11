@@ -1,9 +1,9 @@
 #include "renderer.h"
 
+#include <algorithm>
 #include <iostream>
 #include <string>
 #include <vector>
-#include <algorithm>
 
 // Color defines
 constexpr size_t max_colors = 8;
@@ -25,9 +25,9 @@ renderer::renderer(int screen_width, int screen_height) : screen_width_(screen_w
     }
 
     // Create Window
-    sdl_window_ = SDL_CreateWindow("N-Body Simulation", SDL_WINDOWPOS_CENTERED,
+    sdl_window_ = std::unique_ptr<SDL_Window, sdl_deleter>(SDL_CreateWindow("N-Body Simulation", SDL_WINDOWPOS_CENTERED,
                                     SDL_WINDOWPOS_CENTERED, screen_width,
-                                    screen_height, SDL_WINDOW_SHOWN);
+                                    screen_height, SDL_WINDOW_SHOWN));
 
     if (sdl_window_ == nullptr) 
     {
@@ -36,7 +36,7 @@ renderer::renderer(int screen_width, int screen_height) : screen_width_(screen_w
     }
 
     // Create renderer
-    sdl_renderer_ = SDL_CreateRenderer(sdl_window_, -1, SDL_RENDERER_ACCELERATED);
+    sdl_renderer_ = std::unique_ptr<SDL_Renderer, sdl_deleter>(SDL_CreateRenderer(sdl_window_.get(), -1, SDL_RENDERER_ACCELERATED));
     if (sdl_renderer_ == nullptr) 
     {
         std::cerr << "Renderer could not be created.\n";
@@ -48,7 +48,6 @@ renderer::renderer(int screen_width, int screen_height) : screen_width_(screen_w
 ///
 renderer::~renderer() 
 {
-    SDL_DestroyWindow(sdl_window_);
     SDL_Quit();
 }
 
@@ -57,7 +56,7 @@ renderer::~renderer()
 auto renderer::update_window_title(uint64_t n_particles, int fps) -> void
 {
     std::string title{"Particles: " + std::to_string(n_particles) + " FPS: " + std::to_string(fps)};
-    SDL_SetWindowTitle(sdl_window_, title.c_str());
+    SDL_SetWindowTitle(sdl_window_.get(), title.c_str());
 }
 
 ///
@@ -65,14 +64,14 @@ auto renderer::update_window_title(uint64_t n_particles, int fps) -> void
 auto renderer::render(const std::vector<particle>& particles, const camera& cam) -> void
 {
     // Clear screen
-    SDL_SetRenderDrawColor(sdl_renderer_, background_color.r, background_color.g, background_color.b, background_color.a);
-    SDL_RenderClear(sdl_renderer_);
+    SDL_SetRenderDrawColor(sdl_renderer_.get(), background_color.r, background_color.g, background_color.b, background_color.a);
+    SDL_RenderClear(sdl_renderer_.get());
 
     // Render particles
     render_particles(particles, cam);
   
     // Update Screen
-    SDL_RenderPresent(sdl_renderer_);
+    SDL_RenderPresent(sdl_renderer_.get());
 }
 
 ///
@@ -80,8 +79,8 @@ auto renderer::render(const std::vector<particle>& particles, const camera& cam)
 auto renderer::render(const tree_node& tree, const std::vector<particle>& particles, const camera& cam) -> void
 {
     // Clear screen
-    SDL_SetRenderDrawColor(sdl_renderer_, background_color.r, background_color.g, background_color.b, background_color.a);
-    SDL_RenderClear(sdl_renderer_);
+    SDL_SetRenderDrawColor(sdl_renderer_.get(), background_color.r, background_color.g, background_color.b, background_color.a);
+    SDL_RenderClear(sdl_renderer_.get());
 
     // Render particles
     render_particles(particles, cam);
@@ -90,7 +89,7 @@ auto renderer::render(const tree_node& tree, const std::vector<particle>& partic
     render_tree(tree, cam);
 
     // Update Screen
-    SDL_RenderPresent(sdl_renderer_);
+    SDL_RenderPresent(sdl_renderer_.get());
 }
 
 ///
@@ -123,8 +122,8 @@ auto renderer::render_particles(const std::vector<particle>& particles, const ca
         auto band_end = std::min((i + 1) * band_size, static_cast<int>(points.size()));
         auto corrected_band_size = band_end - band_start;
         auto current_color = colors[i];
-        SDL_SetRenderDrawColor(sdl_renderer_, current_color.r, current_color.g, current_color.b, current_color.a);
-        SDL_RenderDrawPoints(sdl_renderer_, points.data() + band_start, static_cast<int>(corrected_band_size));
+        SDL_SetRenderDrawColor(sdl_renderer_.get(), current_color.r, current_color.g, current_color.b, current_color.a);
+        SDL_RenderDrawPoints(sdl_renderer_.get(), points.data() + band_start, static_cast<int>(corrected_band_size));
     }
 }
 
@@ -132,14 +131,14 @@ auto renderer::render_particles(const std::vector<particle>& particles, const ca
 ///
 auto renderer::render_tree(const tree_node& tree, const camera& cam) -> void
 {
-    SDL_SetRenderDrawBlendMode(sdl_renderer_, SDL_BlendMode::SDL_BLENDMODE_BLEND);
+    SDL_SetRenderDrawBlendMode(sdl_renderer_.get(), SDL_BlendMode::SDL_BLENDMODE_BLEND);
 
     std::vector<SDL_Rect> rectangles;
     render_tree_nodes(rectangles, tree, cam);
-    SDL_SetRenderDrawColor(sdl_renderer_, quad_tree_color.r, quad_tree_color.g, quad_tree_color.b, quad_tree_color.a);
-    SDL_RenderDrawRects(sdl_renderer_, rectangles.data(), static_cast<int>(rectangles.size()));
+    SDL_SetRenderDrawColor(sdl_renderer_.get(), quad_tree_color.r, quad_tree_color.g, quad_tree_color.b, quad_tree_color.a);
+    SDL_RenderDrawRects(sdl_renderer_.get(), rectangles.data(), static_cast<int>(rectangles.size()));
     
-    SDL_SetRenderDrawBlendMode(sdl_renderer_, SDL_BlendMode::SDL_BLENDMODE_NONE);
+    SDL_SetRenderDrawBlendMode(sdl_renderer_.get(), SDL_BlendMode::SDL_BLENDMODE_NONE);
 }
 
 ///

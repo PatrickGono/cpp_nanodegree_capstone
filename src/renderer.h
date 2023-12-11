@@ -19,6 +19,16 @@ struct color
 ///
 class renderer 
 {
+public: // Structs
+  struct sdl_deleter 
+  {
+    void operator()(SDL_Renderer* ptr) { if (ptr != nullptr) { SDL_DestroyRenderer(ptr); }}
+    void operator()(SDL_Window* ptr) { if (ptr != nullptr) { SDL_DestroyWindow(ptr); }}
+  };
+  
+  using renderer_ptr = std::unique_ptr<SDL_Renderer, sdl_deleter>;
+  using window_ptr = std::unique_ptr<SDL_Window, sdl_deleter>;
+
 public: // Structors
     renderer(int screen_width, int screen_height);
     ~renderer();
@@ -74,6 +84,6 @@ private: // Implementation
 private: // Variables
     const std::size_t screen_width_;
     const std::size_t screen_height_;
-    SDL_Window* sdl_window_;
-    SDL_Renderer* sdl_renderer_;
+    window_ptr sdl_window_;
+    renderer_ptr sdl_renderer_;
 };
