@@ -6,6 +6,10 @@
 #include "renderer.h"
 #include "tree.h"
 
+#include <future>
+#include <mutex>
+#include <vector>
+
 class simulation
 {
 public: // Enums
@@ -105,13 +109,19 @@ public: // Interface
     /// Core method of the class. Starts the simulation and the update loop.
     /// \param Access to renderer used for rendering at each update step.
     ///
-    auto run(renderer &renderer) -> void;
+    auto run(renderer& renderer) -> void;
   
 private: // Implementation
     ///
     /// Resets the simulation and initializes relevant parameters.
     ///
     auto init() -> void;
+
+    ///
+    /// Starts the simulation update thread using std::async
+    /// \param Access to renderer used for rendering at each update step.
+    ///
+    auto start_simulation_thread(renderer& renderer) -> void;
 
     ///
     /// Updates the simulation using the velocity Verlet algorithm.
@@ -150,9 +160,10 @@ private: // Implementation
 
     ///
     /// Creates a quad tree from the particles.
+    /// \param update_area If true, updates the area after every couple of frames
     /// \return The root node of the created tree
     ///
-    auto create_quad_tree() -> tree_node;
+    auto create_quad_tree(bool update_area = false) -> tree_node;
 
     ///
     /// Calculates the square enclosing all particles.
@@ -174,4 +185,6 @@ private: // Variables
     float_type delta_t_;
     float_type half_delta_t_squared_;
     float_type theta_;
+    std::mutex controller_mutex_;
+    std::future<void> simulation_thread_future_;
 };

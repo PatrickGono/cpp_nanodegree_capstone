@@ -123,24 +123,18 @@ auto simulation::decrease_theta() -> void
 
 ///
 ///
-auto simulation::run(renderer &renderer) -> void
+auto simulation::run(renderer& renderer) -> void
 {
     init();
-    auto title_timestamp = SDL_GetTicks();
 
+    start_simulation_thread(renderer);
+    
     while (state_ != state::exiting)
     {
-        controller::handle_input(*this);
-        auto frame_start = SDL_GetTicks();
-
-        // Update simulation or wait
-        if (state_ == state::running)
+        // Handle input
         {
-            update();
-        }
-        else if (state_ == state::paused)
-        {
-            SDL_Delay(16);
+            auto lock = std::lock_guard(controller_mutex_);
+            controller::handle_input(*this);
         }
 
         // Render
@@ -154,16 +148,8 @@ auto simulation::run(renderer &renderer) -> void
             renderer.render(particles_, camera_);
         }
 
-        // Post-update
-        auto frame_end = SDL_GetTicks();
-        ++frame_count_;
-
-        if (frame_end - title_timestamp >= 1000)
-        {
-            renderer.update_window_title(n_particles_, frame_count_);
-            title_timestamp = frame_end;
-            frame_count_ = 0;
-        }
+        // 16 ms ~ 60 fps
+        SDL_Delay(16);
     }
 }
 
@@ -180,6 +166,41 @@ auto simulation::init() -> void
     frame_count_ = 0;
     render_quad_tree_ = false;
     state_ = state::running;
+}
+
+///
+///
+auto simulation::start_simulation_thread(renderer& renderer) -> void
+{
+    simulation_thread_future_ = std::async(std::launch::async, [this, &renderer]()
+    {
+        auto title_timestamp = SDL_GetTicks();
+        while (state_ != state::exiting)
+        {
+            auto frame_start = SDL_GetTicks();
+    
+            // Update simulation or wait
+            if (state_ == state::running)
+            {
+                update();
+            }
+            else if (state_ == state::paused)
+            {
+                SDL_Delay(16);
+            }
+    
+            // Post-update
+            auto frame_end = SDL_GetTicks();
+            ++frame_count_;
+    
+            if (frame_end - title_timestamp >= 1000)
+            {
+                renderer.update_window_title(n_particles_, frame_count_);
+                title_timestamp = frame_end;
+                frame_count_ = 0;
+            }
+        }
+    });
 }
 
 ///
@@ -375,7 +396,7 @@ auto simulation::calculate_brute_force_async(std::vector<vec>& accelerations) co
 auto simulation::calculate_barnes_hut(std::vector<vec>& accelerations) -> void
 {
     // Build quad tree
-    auto quad_tree = create_quad_tree();
+    auto quad_tree = create_quad_tree(true);
 
     // Compute mass statistics
     quad_tree.calculate_center_of_mass();
@@ -392,7 +413,7 @@ auto simulation::calculate_barnes_hut(std::vector<vec>& accelerations) -> void
 auto simulation::calculate_barnes_hut_threads(std::vector<vec>& accelerations) -> void
 {
     // Build quad tree
-    auto quad_tree = create_quad_tree();
+    auto quad_tree = create_quad_tree(true);
 
     // Compute mass statistics
     quad_tree.calculate_center_of_mass();
@@ -427,10 +448,10 @@ auto simulation::calculate_barnes_hut_threads(std::vector<vec>& accelerations) -
 
 ///
 ///
-auto simulation::create_quad_tree() -> tree_node
+auto simulation::create_quad_tree(bool update_area) -> tree_node
 {
     // Adjust area every n frames
-    if (frame_count_ % 10 == 0)
+    if (update_area && frame_count_ % 10 == 0)
     {
         area_ = calculate_particles_bounds();
     }
