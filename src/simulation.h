@@ -24,9 +24,10 @@ public: // Enums
 
     enum class state
     {
+        init,
         running,
         paused,
-        exiting
+        exiting,
     };
 
 public: // Structors
@@ -173,7 +174,9 @@ private: // Implementation
 
 private: // Variables
     uint64_t n_particles_;
+    uint64_t n_particles_new_;
     std::vector<particle> particles_;
+    std::vector<particle> particles_new_;
     particle_distribution initial_distribution_;
     particle_distribution::simulation_scenario scenario_;
     algorithm algorithm_;

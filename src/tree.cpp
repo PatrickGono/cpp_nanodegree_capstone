@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-constexpr float_type epsilon = 10000;
+constexpr float_type epsilon = 100000;
 constexpr float_type g_const = 1.0;
 
 ///

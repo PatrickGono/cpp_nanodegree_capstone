@@ -248,7 +248,7 @@ auto particle_distribution::generate_random_vec_galaxy() -> vec
 {
     auto distance = 2.0;
     auto vector = vec();
-    while (distance > 1.0)
+    while (distance > 1.0 || distance < 0.001)
     {
         const auto ur = random_cauchy_(random_engine_);
         distance = std::abs(ur);

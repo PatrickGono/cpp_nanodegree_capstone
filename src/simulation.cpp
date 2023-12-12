@@ -8,16 +8,17 @@
 #include <thread>
 
 constexpr float_type g_const = 1;
-constexpr float_type epsilon = 0.0001;
+constexpr float_type epsilon = 0.00001;
 constexpr float_type max_speed = 250.0;
 
 ///
 ///
 simulation::simulation(uint64_t n_particles)
    : n_particles_{n_particles}
+   , n_particles_new_{n_particles}
    , initial_distribution_{}
    , scenario_{particle_distribution::simulation_scenario::one_cluster}
-   , algorithm_{algorithm::brute_force_threads}
+   , algorithm_{algorithm::brute_force}
    , render_quad_tree_{false}
    , frame_count_{0}
    , state_{state::paused}
@@ -92,7 +93,7 @@ auto simulation::set_scenario(particle_distribution::simulation_scenario scenari
 ///
 auto simulation::increase_particles_by_1000_and_restart() -> void
 {
-    n_particles_ += 1000;
+    n_particles_new_ += 1000;
     init();
 }
 
@@ -100,9 +101,9 @@ auto simulation::increase_particles_by_1000_and_restart() -> void
 ///
 auto simulation::decrease_particles_by_1000_and_restart() -> void
 {
-    if (n_particles_ > 1000)
+    if (n_particles_new_ > 1000)
     {
-        n_particles_ -= 1000;
+        n_particles_new_ -= 1000;
     }
     init();
 }
@@ -157,15 +158,15 @@ auto simulation::run(renderer& renderer) -> void
 ///
 auto simulation::init() -> void
 {
-    particles_ = initial_distribution_.create_distribution(
+    particles_new_ = initial_distribution_.create_distribution(
         scenario_,
         particle_distribution::position_distribution::galaxy,
         particle_distribution::velocity_distribution::galaxy,
-        n_particles_, max_speed, true);
+        n_particles_new_, max_speed, true);
 
     frame_count_ = 0;
     render_quad_tree_ = false;
-    state_ = state::running;
+    state_ = state::init;
 }
 
 ///
@@ -179,14 +180,27 @@ auto simulation::start_simulation_thread(renderer& renderer) -> void
         {
             auto frame_start = SDL_GetTicks();
     
-            // Update simulation or wait
-            if (state_ == state::running)
+            // Init simulation, update, or wait
+            switch (state_)
             {
-                update();
-            }
-            else if (state_ == state::paused)
-            {
-                SDL_Delay(16);
+                case state::init:
+                {
+                    particles_ = particles_new_;
+                    n_particles_ = n_particles_new_;
+                    state_ = state::running;
+                    break;
+                }
+                case state::running:
+                {
+                    update();
+                    break;
+                }
+                case state::paused:
+                default:
+                {
+                    SDL_Delay(16);
+                    break;
+                }
             }
     
             // Post-update
